@@ -22,10 +22,10 @@ export default function PersistentChrome({ bootActive }) {
         type="button"
         data-interactive
         onClick={() => !isLanding && navigateTo("/menu")}
-        aria-label="Arkade Aura"
+        aria-label="Arkade Sapphire"
         className={`pointer-events-auto absolute top-8 left-10 bg-transparent border-0 font-display ${tone} text-base leading-none tracking-[-0.01em]`}
       >
-        Arkade Aura
+        Arkade Sapphire
       </button>
 
       <div className="pointer-events-auto absolute top-8 right-10 flex items-center gap-6">

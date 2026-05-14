@@ -37,7 +37,7 @@ export default function Landing() {
             ref={titleRef}
             className="font-display text-paper text-7xl leading-[0.95] tracking-[-0.015em]"
           >
-            Arkade Aura
+            Arkade Sapphire
           </h1>
 
           <p

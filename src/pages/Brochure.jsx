@@ -51,7 +51,7 @@ export default function Brochure() {
             ref={copyRef}
             className="mt-6 max-w-md text-sm leading-relaxed text-platinum/70"
           >
-            Plans, specifications, and the thinking behind Arkade Aura.
+            Plans, specifications, and the thinking behind Arkade Sapphire.
           </p>
 
           <div ref={ctaRef} className="mt-10">

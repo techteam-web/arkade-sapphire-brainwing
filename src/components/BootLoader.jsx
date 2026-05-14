@@ -45,7 +45,7 @@ export default function BootLoader({ onComplete }) {
         ref={wordmarkRef}
         className="font-display text-paper text-5xl leading-none tracking-[-0.01em]"
       >
-        Arkade Aura
+        Arkade Sapphire
       </h1>
     </div>
   );
