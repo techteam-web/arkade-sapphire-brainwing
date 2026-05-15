@@ -1,17 +1,7 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "../gsap/gsapConfig.js";
-import PlaceholderMedia from "../components/PlaceholderMedia.jsx";
-
-const CONNECTIVITY = [
-  { place: "Western Express Highway",    time: "2 mins"  },
-  { place: "Santacruz Station",          time: "3 mins"  },
-  { place: "Metro Line 2A / 7",          time: "7 mins"  },
-  { place: "Domestic Airport (T1)",      time: "10 mins" },
-  { place: "SCLR",                       time: "15 mins" },
-  { place: "Bandra-Worli Sealink",       time: "20 mins" },
-  { place: "International Airport (T2)", time: "20 mins" },
-  { place: "JVLR",                       time: "30 mins" },
-];
+import LocationMap from "../map/LocationMap.jsx";
+import { POIS } from "../map/locationData.js";
 
 export default function Location() {
   const rootRef = useRef(null);
@@ -58,23 +48,21 @@ export default function Location() {
           </h1>
 
           <ul className="mt-10 flex flex-col">
-            {CONNECTIVITY.map((row, i) => (
+            {POIS.map((poi, i) => (
               <li
-                key={row.place}
+                key={poi.id}
                 ref={(el) => (rowsRef.current[i] = el)}
                 className="flex items-baseline justify-between py-3.5 border-b border-platinum/10"
               >
-                <span className="text-[0.9rem] text-paper/85">{row.place}</span>
-                <span className="text-gold text-[0.85rem]">{row.time}</span>
+                <span className="text-[0.9rem] text-paper/85">{poi.place}</span>
+                <span className="text-gold text-[0.85rem]">{poi.time}</span>
               </li>
             ))}
           </ul>
         </section>
 
         <section className="col-span-7 flex items-center justify-center">
-          <div ref={mapRef} className="w-full h-full">
-            <PlaceholderMedia />
-          </div>
+          <LocationMap mapRef={mapRef} />
         </section>
       </div>
     </main>
