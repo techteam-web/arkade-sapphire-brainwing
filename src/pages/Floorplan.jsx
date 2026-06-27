@@ -3,16 +3,15 @@ import { gsap, useGSAP } from "../gsap/gsapConfig.js";
 import PlaceholderMedia from "../components/PlaceholderMedia.jsx";
 
 const TYPOLOGIES = [
-  { label: "3 BHK — Type A", carpet: "1,860 sq.ft.", deck: "210 sq.ft." },
-  { label: "3 BHK — Type B", carpet: "1,910 sq.ft.", deck: "240 sq.ft." },
+  { 
+    label: "3 BHK — Residencial", 
+    carpet: "1,860 sq.ft.", 
+    deck: "210 sq.ft."
+   },
+  { label: "Commercial floor", carpet: "1,910 sq.ft.", deck: "240 sq.ft." },
 ];
 
-const MARKERS = [
-  { x: 22, y: 38, label: "Living" },
-  { x: 58, y: 30, label: "Primary suite" },
-  { x: 70, y: 60, label: "Eco-deck" },
-  { x: 35, y: 70, label: "Kitchen" },
-];
+
 
 export default function Floorplan() {
   const rootRef = useRef(null);
@@ -20,7 +19,6 @@ export default function Floorplan() {
   const planRef = useRef(null);
   const titleRef = useRef(null);
   const [typeIdx, setTypeIdx] = useState(0);
-  const [activeMarker, setActiveMarker] = useState(null);
 
   useGSAP(
     () => {
@@ -91,28 +89,7 @@ export default function Floorplan() {
         <div ref={planRef} className="col-span-9 relative">
           <PlaceholderMedia />
 
-          {MARKERS.map((m, i) => (
-            <button
-              key={m.label}
-              type="button"
-              data-interactive
-              onClick={() => setActiveMarker(activeMarker === i ? null : i)}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${m.x}%`, top: `${m.y}%` }}
-              aria-label={m.label}
-            >
-              <span
-                className={`block w-2 h-2 rounded-full transition-colors duration-300 ${
-                  activeMarker === i ? "bg-gold" : "bg-gold/40 hover:bg-gold/70"
-                }`}
-              />
-              {activeMarker === i && (
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap text-[0.65rem] tracking-[0.28em] uppercase text-paper">
-                  {m.label}
-                </span>
-              )}
-            </button>
-          ))}
+         
         </div>
       </div>
     </main>
