@@ -127,9 +127,10 @@ export default function Views() {
   // Toggle Auto Rotate
   const toggleAutoRotate = () => {
       const viewer = viewerRef.current;
+      if (!viewer || !autorotateRef.current) return;
       if (isAutoRotating) {
           viewer.stopMovement();
-        viewer.setIdleMovement(Infinity, null);
+          viewer.setIdleMovement(Infinity, null);
       } else {
           viewer.startMovement(autorotateRef.current);
           viewer.setIdleMovement(3000, autorotateRef.current); 
@@ -205,6 +206,29 @@ export default function Views() {
               );
             })}
           </div>
+        </div>
+
+        <span className="block h-px w-full bg-ink/10" />
+
+        <div className="flex items-center justify-between">
+          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium">
+            Auto Rotate
+          </span>
+          <button
+            type="button"
+            data-interactive
+            onClick={toggleAutoRotate}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              isAutoRotating ? "bg-gold" : "bg-ink/10"
+            }`}
+            aria-label="Toggle auto rotation"
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-paper shadow ring-0 transition duration-200 ease-in-out ${
+                isAutoRotating ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
         </div>
       </aside>
     </main>

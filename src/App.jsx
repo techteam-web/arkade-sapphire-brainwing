@@ -45,7 +45,13 @@ export default function App() {
           <Route path="/brochure" element={<Brochure />} />
           <Route path="/showcase" element={<Showcase />} />
         </Routes>
+       
       </AudioProvider>
+      <img
+        src="/Brainwing-logo.webp"
+        alt="Brainwing logo"
+        className="fixed bottom-4 right-4 w-36 z-50 pointer-events-none opacity-80"
+      />
     </TransitionProvider>
   );
 }
