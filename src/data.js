@@ -1,4 +1,4 @@
-var APP_DATA = {
+export const APP_DATA = {
   "scenes": [
     {
       "id": "0-dji_0876_01",
