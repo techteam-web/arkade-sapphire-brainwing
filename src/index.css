@@ -25,8 +25,20 @@
   --breakpoint-5xl: 3840px;
 }
 
+/* Custom "mob" variant — applies on phone-width screens (<= 480px covers
+   360–430px devices). Usage: `mob:flex-col`, `mob:px-6`, etc. */
+@custom-variant mob (@media (max-width: 480px));
+
 html {
   font-size: max(min(calc(100vw / 120), calc(100vh / 67.5)), 7px);
+}
+
+/* On phones the 120-column proportional canvas collapses to an unreadable
+   ~7px root; switch to a comfortable width-scaled base instead. */
+@media (max-width: 480px) {
+  html {
+    font-size: clamp(13px, 4.1vw, 16.5px);
+  }
 }
 
 body {
@@ -42,4 +54,17 @@ body {
 
 [data-interactive] {
   cursor: pointer;
+}
+
+/* Left-edge image fade for the hero/menu renders (desktop only — on phones the
+   render goes full-bleed with a bottom scrim instead). */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 14%, #000 34%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.35) 14%, #000 34%);
+}
+@media (max-width: 480px) {
+  .edge-fade {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }

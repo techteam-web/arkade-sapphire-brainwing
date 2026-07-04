@@ -144,25 +144,25 @@ export default function Gallery() {
           </div>
         ))}
 
-        {/* Cinematic vignette for legibility */}
-        <div className="absolute inset-0 z-10 pointer-events-none bg-linear-to-t from-espresso/85 via-transparent to-espresso/40" />
-        <div className="absolute inset-0 z-10 pointer-events-none bg-linear-to-r from-espresso/50 via-transparent to-espresso/20" />
+        {/* Light vignette — just enough for caption/counter legibility */}
+        <div className="absolute inset-0 z-10 pointer-events-none bg-linear-to-t from-espresso/55 via-transparent to-transparent" />
+        <div className="absolute inset-0 z-10 pointer-events-none bg-linear-to-r from-espresso/20 via-transparent to-transparent" />
       </div>
 
-      {/* Page heading */}
-      <div className="absolute top-20 left-20 z-20">
+      {/* Page heading (hidden on phones — the persistent brand already sits here) */}
+      <div className="absolute top-20 left-20 z-20 mob:hidden">
         <span className="text-[0.62rem] tracking-[0.42em] uppercase text-platinum/70">Gallery</span>
       </div>
 
       {/* Caption */}
-      <div ref={captionRef} className="absolute bottom-20 left-20 z-20 max-w-xl">
-        <h2 className="font-display text-paper text-5xl leading-[1.02] tracking-[-0.01em]">
+      <div ref={captionRef} className="absolute bottom-20 left-20 z-20 max-w-xl mob:bottom-24 mob:left-6 mob:right-6 mob:max-w-full">
+        <h2 className="font-display text-paper text-5xl leading-[1.02] tracking-[-0.01em] mob:text-3xl">
           {active.title}
         </h2>
       </div>
 
       {/* Counter */}
-      <div ref={counterRef} className="absolute bottom-20 right-20 z-20">
+      <div ref={counterRef} className="absolute bottom-20 right-20 z-20 mob:bottom-7 mob:right-6">
         <div className="font-display text-paper text-lg tracking-widest tabular-nums">
           <span className="text-gold">{pad(index)}</span>
           <span className="text-platinum/50"> / {pad(N - 1)}</span>
@@ -175,7 +175,7 @@ export default function Gallery() {
         data-interactive
         aria-label="Previous image"
         onClick={() => step(-1)}
-        className="group absolute left-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full border border-platinum/25 bg-espresso/20 backdrop-blur-sm flex items-center justify-center hover:border-gold hover:bg-espresso/40 transition-all duration-300"
+        className="group absolute left-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full border border-platinum/25 bg-espresso/20 backdrop-blur-sm flex items-center justify-center hover:border-gold hover:bg-espresso/40 transition-all duration-300 mob:w-11 mob:h-11 mob:left-3"
       >
         <svg viewBox="0 0 24 24" className="w-5 h-5 text-platinum/80 group-hover:text-gold transition-colors" fill="none" stroke="currentColor" strokeWidth="1.4">
           <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
@@ -186,15 +186,15 @@ export default function Gallery() {
         data-interactive
         aria-label="Next image"
         onClick={() => step(1)}
-        className="group absolute right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full border border-platinum/25 bg-espresso/20 backdrop-blur-sm flex items-center justify-center hover:border-gold hover:bg-espresso/40 transition-all duration-300"
+        className="group absolute right-8 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full border border-platinum/25 bg-espresso/20 backdrop-blur-sm flex items-center justify-center hover:border-gold hover:bg-espresso/40 transition-all duration-300 mob:w-11 mob:h-11 mob:right-3"
       >
         <svg viewBox="0 0 24 24" className="w-5 h-5 text-platinum/80 group-hover:text-gold transition-colors" fill="none" stroke="currentColor" strokeWidth="1.4">
           <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
-      {/* Thumbnail rail */}
-      <div className="absolute top-1/2 right-28 -translate-y-1/2 z-20 flex flex-col gap-2.5">
+      {/* Thumbnail rail (hidden on phones — arrows + swipe drive navigation there) */}
+      <div className="absolute top-1/2 right-28 -translate-y-1/2 z-20 flex flex-col gap-2.5 mob:hidden">
         {GALLERY_IMAGES.map((img, i) => (
           <button
             key={img.src}

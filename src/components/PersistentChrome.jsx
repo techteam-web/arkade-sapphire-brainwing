@@ -18,17 +18,24 @@ export default function PersistentChrome({ bootActive }) {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-40">
-      <button
-        type="button"
-        data-interactive
-        onClick={() => !isLanding && navigateTo("/menu")}
-        aria-label="Arkade Sapphire"
-        className={`pointer-events-auto absolute top-8 left-10 bg-transparent border-0 font-display ${tone} text-base leading-none tracking-[-0.01em]`}
-      >
-        Arkade Sapphire
-      </button>
+      {!isLanding && (
+        <button
+          type="button"
+          data-interactive
+          onClick={() => navigateTo("/menu")}
+          aria-label="Arkade Sapphire"
+          className="pointer-events-auto absolute top-8 left-10 bg-transparent border-0 p-0 leading-none mob:top-5 mob:left-5"
+        >
+          <img
+            src={onPaper ? "/arkade-logo.webp" : "/arkade-logo-light.webp"}
+            alt="Arkade Sapphire"
+            draggable="false"
+            className="h-5 2xl:h-6 3xl:h-7 w-auto max-w-[46vw] object-contain select-none"
+          />
+        </button>
+      )}
 
-      <div className="pointer-events-auto absolute top-8 right-10 flex items-center gap-6">
+      <div className="pointer-events-auto absolute top-8 right-10 flex items-center gap-6 mob:top-5 mob:right-5 mob:gap-4">
         {showMenuLink && (
           <button
             type="button"

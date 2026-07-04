@@ -36,20 +36,20 @@ export default function Location() {
 
   return (
     <main ref={rootRef} className="relative w-screen h-screen overflow-hidden bg-espresso">
-      <div className="absolute inset-x-20 top-20 bottom-16 grid grid-cols-12 gap-12">
-        <section className="col-span-5 min-w-0 flex flex-col">
+      <div className="absolute inset-x-20 top-20 bottom-16 grid grid-cols-12 gap-12 mob:flex mob:flex-col mob:inset-x-4 mob:top-16 mob:bottom-4 mob:gap-4">
+        <section className="col-span-5 min-w-0 flex flex-col mob:order-2 mob:flex-1 mob:min-h-0">
           <h1
             ref={titleRef}
-            className="font-display text-paper text-3xl leading-none tracking-[-0.01em]"
+            className="font-display text-paper text-3xl leading-none tracking-[-0.01em] mob:text-2xl"
           >
             Location
           </h1>
 
-          <p className="mt-4 text-[0.62rem] tracking-[0.32em] uppercase text-silver/70">
+          <p className="mt-4 text-[0.62rem] tracking-[0.32em] uppercase text-silver/70 mob:mt-2">
             Select a landmark to trace the route
           </p>
 
-          <ul className="mt-8 flex flex-col">
+          <ul className="mt-8 flex flex-col mob:mt-3 mob:overflow-y-auto mob:min-h-0">
             {POIS.map((poi, i) => {
               const isActive = activeId === poi.id;
               return (
@@ -88,7 +88,7 @@ export default function Location() {
           </ul>
         </section>
 
-        <section className="col-span-7 min-w-0 flex items-center justify-center">
+        <section className="col-span-7 min-w-0 flex items-center justify-center mob:order-1 mob:w-full mob:h-[44vh]">
           <LocationMap
             mapRef={mapRef}
             activePoiId={activeId}

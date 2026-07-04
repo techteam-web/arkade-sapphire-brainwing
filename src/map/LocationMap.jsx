@@ -241,8 +241,13 @@ export default function LocationMap({
         {/* Site marker */}
         <Marker longitude={SITE.lng} latitude={SITE.lat} anchor="bottom">
           <div className="flex flex-col items-center pointer-events-none">
-            <span className="font-display text-paper text-[0.85rem] tracking-[0.12em] uppercase whitespace-nowrap mb-1.5 px-2 py-0.5 bg-espresso/75 border border-gold/40">
-              Arkade Sapphire
+            <span className="flex items-center whitespace-nowrap mb-1.5 px-2.5 py-1 bg-espresso/80 border border-gold/40">
+              <img
+                src="/arkade-logo-light.webp"
+                alt="Arkade Sapphire"
+                draggable="false"
+                className="h-3.5 w-auto object-contain select-none"
+              />
             </span>
             <span className="relative w-3 h-3">
               <span className="absolute inset-0 rounded-full bg-gold/40 animate-ping" />
@@ -342,8 +347,8 @@ export default function LocationMap({
         </div>
       )}
 
-      {/* Day/night toggle */}
-      <div className="absolute bottom-6 right-6 flex gap-4 z-10">
+      {/* Day/night toggle (top on phones to clear the map attribution) */}
+      <div className="absolute bottom-6 right-6 flex gap-4 z-10 mob:bottom-auto mob:top-4">
         {["day", "night"].map((m) => (
           <button
             key={m}

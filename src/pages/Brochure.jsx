@@ -80,9 +80,9 @@ export default function Brochure() {
 
   return (
     <main ref={rootRef} className="relative w-screen h-screen overflow-hidden bg-espresso">
-      <div className="absolute inset-x-20 top-20 bottom-16 grid grid-cols-12 gap-14 items-center">
+      <div className="absolute inset-x-20 top-20 bottom-16 grid grid-cols-12 gap-14 items-center mob:flex mob:flex-col mob:justify-center mob:inset-x-6 mob:top-16 mob:bottom-6 mob:gap-8">
         {/* Cover */}
-        <section className="col-span-6 flex items-center justify-center">
+        <section className="col-span-6 flex items-center justify-center mob:order-1">
           <div
             ref={coverRef}
             onMouseMove={onMove}
@@ -92,7 +92,7 @@ export default function Brochure() {
           >
             <div
               ref={coverInner}
-              className="relative w-100 aspect-square rounded-xs overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-gold/30"
+              className="relative w-100 aspect-square rounded-xs overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-gold/30 mob:w-[62vw]"
               style={{ transformStyle: "preserve-3d" }}
             >
               <img
@@ -116,7 +116,7 @@ export default function Brochure() {
         </section>
 
         {/* Copy */}
-        <section className="col-span-6 flex flex-col">
+        <section className="col-span-6 flex flex-col mob:order-2 mob:items-center mob:text-center">
           <div ref={eyebrowRef} className="flex items-center gap-4">
             <span className="w-10 h-px bg-gold/70" />
             <span className="text-[0.62rem] tracking-[0.42em] uppercase text-gold">
@@ -126,7 +126,7 @@ export default function Brochure() {
 
           <h1
             ref={titleRef}
-            className="mt-6 font-display text-paper text-5xl leading-[1.03] tracking-[-0.01em]"
+            className="mt-6 font-display text-paper text-5xl leading-[1.03] tracking-[-0.01em] mob:mt-4 mob:text-4xl"
           >
             The Brochure
           </h1>
@@ -150,7 +150,7 @@ export default function Brochure() {
             <span>16 MB</span>
           </div>
 
-          <div ref={ctaRef} className="mt-10 flex items-center gap-4">
+          <div ref={ctaRef} className="mt-10 flex items-center gap-4 mob:mt-7 mob:flex-wrap mob:justify-center">
             <a
               href={BROCHURE_PDF}
               target="_blank"

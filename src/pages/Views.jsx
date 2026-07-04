@@ -148,13 +148,13 @@ export default function Views() {
       {/* Premium Side Menu */}
       <aside
         ref={panelRef}
-        className="absolute right-10 top-28 z-10 w-72 bg-paper/80 backdrop-blur-md border border-ink/5 p-8 rounded-lg flex flex-col gap-6 text-ink shadow-sm pointer-events-auto"
+        className="absolute right-10 top-28 z-10 w-72 bg-paper/80 backdrop-blur-md border border-ink/5 p-8 rounded-lg flex flex-col gap-6 text-ink shadow-sm pointer-events-auto mob:right-3 mob:top-20 mob:w-40 mob:p-3.5 mob:gap-2.5 mob:rounded-md"
       >
         <div>
-          <span className="text-[0.65rem] tracking-[0.25em] uppercase text-silver font-medium block mb-1">
+          <span className="text-[0.65rem] tracking-[0.25em] uppercase text-silver font-medium block mb-1 mob:text-[0.5rem] mob:mb-0.5">
             Interactive
           </span>
-          <h1 className="font-display text-3xl leading-[1.05] tracking-[-0.01em] text-ink">
+          <h1 className="font-display text-3xl leading-[1.05] tracking-[-0.01em] text-ink mob:text-base">
             360° Views
           </h1>
         </div>
@@ -162,7 +162,7 @@ export default function Views() {
         <span className="block h-px w-full bg-ink/10" />
 
         <div className="flex flex-col gap-3">
-          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium">
+          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium mob:text-[0.5rem]">
             Select Level
           </span>
           <div className="flex flex-col gap-1">
@@ -174,7 +174,7 @@ export default function Views() {
                   type="button"
                   data-interactive
                   onClick={() => switchSceneSynced(idx)}
-                  className="group relative border-0 bg-transparent py-2.5 pl-4 pr-2 text-left transition-all duration-300 flex items-center justify-between cursor-pointer"
+                  className="group relative border-0 bg-transparent py-2.5 pl-4 pr-2 text-left transition-all duration-300 flex items-center justify-between cursor-pointer mob:py-1.5 mob:pl-3"
                 >
                   {/* Left active line accent */}
                   <span
@@ -185,7 +185,7 @@ export default function Views() {
                     }`}
                   />
                   <span
-                    className={`text-xs uppercase tracking-[0.15em] transition-colors duration-300 ${
+                    className={`text-xs uppercase tracking-[0.15em] transition-colors duration-300 mob:text-[0.6rem] ${
                       isActive
                         ? "text-gold font-semibold"
                         : "text-ink/60 group-hover:text-ink"
@@ -194,7 +194,7 @@ export default function Views() {
                     {floor.label}
                   </span>
                   <span
-                    className={`text-[0.65rem] tracking-[0.05em] uppercase font-light transition-colors duration-300 ${
+                    className={`text-[0.65rem] tracking-[0.05em] uppercase font-light transition-colors duration-300 mob:text-[0.5rem] ${
                       isActive
                         ? "text-gold"
                         : "text-silver group-hover:text-ink/80"
@@ -211,7 +211,7 @@ export default function Views() {
         <span className="block h-px w-full bg-ink/10" />
 
         <div className="flex items-center justify-between">
-          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium">
+          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium mob:text-[0.5rem]">
             Auto Rotate
           </span>
           <button

@@ -41,12 +41,13 @@ export default function BootLoader({ onComplete }) {
       className="fixed inset-0 z-60 bg-espresso flex items-center justify-center"
       style={{ opacity: 0, visibility: "hidden" }}
     >
-      <h1
+      <img
         ref={wordmarkRef}
-        className="font-display text-paper text-5xl leading-none tracking-[-0.01em]"
-      >
-        Arkade Sapphire
-      </h1>
+        src="/arkade-logo-light.webp"
+        alt="Arkade Sapphire"
+        draggable="false"
+        className="w-[60vw] max-w-xl h-auto object-contain select-none"
+      />
     </div>
   );
 }
