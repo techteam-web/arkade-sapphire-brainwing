@@ -1,8 +1,10 @@
 import { useAudio } from "../context/audio.js";
 
-export default function MuteToggle() {
+export default function MuteToggle({ onPaper = false }) {
   const { isMuted, toggleMute } = useAudio();
-  const tone = isMuted ? "text-platinum/50" : "text-gold";
+  // When muted, adapt the resting colour to the page so the icon stays visible:
+  // dark on the light (paper) page, light on the dark pages.
+  const tone = isMuted ? (onPaper ? "text-ink/55" : "text-platinum/50") : "text-gold";
 
   return (
     <button

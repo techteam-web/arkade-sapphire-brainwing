@@ -23,13 +23,13 @@ export default function Menu() {
 
   useGSAP(
     () => {
-      gsap.set(imgWrapRef.current, { clipPath: "inset(0% 0% 0% 100%)" });
+      gsap.set(imgWrapRef.current, { opacity: 0 });
       gsap.set(heroImgRef.current, { scale: 1.2 });
       gsap.set(rowsRef.current, { opacity: 0, y: "0.6rem" });
 
       const tl = gsap.timeline({ delay: 0.2 });
-      tl.to(imgWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "auraExpo" }, 0)
-        .to(heroImgRef.current, { scale: 1, duration: 1.9, ease: "auraExpo" }, 0)
+      tl.to(imgWrapRef.current, { opacity: 1, duration: 1.5, ease: "power2.out" }, 0)
+        .to(heroImgRef.current, { scale: 1, duration: 2.1, ease: "auraExpo" }, 0)
         .to(
           rowsRef.current,
           { opacity: 1, y: 0, duration: 0.7, ease: "auraExpo", stagger: 0.07 },
@@ -55,29 +55,47 @@ export default function Menu() {
 
   return (
     <main ref={rootRef} className="relative w-screen h-screen overflow-hidden bg-espresso">
-      {/* Full-height render — bleeds off the right on desktop, full-bleed on phones */}
-      <div
-        ref={imgWrapRef}
-        className="absolute top-0 right-0 bottom-0 w-[52%] overflow-hidden mob:inset-0 mob:w-full"
-      >
+      {/* Full-bleed render covering the entire viewport. */}
+      <div ref={imgWrapRef} className="absolute inset-0 overflow-hidden">
         <img
           ref={heroImgRef}
           src="/aminities/golden-hour.webp"
           alt="Arkade Sapphire"
           draggable="false"
-          className="edge-fade w-full h-full object-cover select-none"
+          className="w-full h-full object-cover select-none"
         />
-        {/* Phone-only scrim so the nav stays legible over the render */}
-        <div className="hidden mob:block absolute inset-0 pointer-events-none bg-linear-to-r from-espresso via-espresso/75 to-espresso/30" />
       </div>
+
+      {/* Evoke-style gradient — deep on the left where the nav sits, fading to
+          clear over the render on the right. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none mob:hidden"
+        style={{
+          background: [
+            "linear-gradient(105deg, rgba(24,16,14,0.95) 0%, rgba(38,26,21,0.86) 22%, rgba(43,29,23,0.55) 40%, rgba(43,29,23,0.16) 56%, rgba(43,29,23,0) 70%)",
+            "radial-gradient(85% 80% at 0% 0%, rgba(18,11,10,0.5), rgba(18,11,10,0) 58%)",
+            "linear-gradient(to top, rgba(24,16,14,0.45) 0%, rgba(24,16,14,0) 28%)",
+          ].join(", "),
+        }}
+      />
+      {/* Phone gradient — stronger on the left half so the nav reads clearly. */}
+      <div
+        aria-hidden
+        className="hidden mob:block absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to right, rgba(24,16,14,0.94) 0%, rgba(30,20,18,0.78) 34%, rgba(43,29,23,0.4) 62%, rgba(43,29,23,0.12) 100%)",
+        }}
+      />
 
       {/* Subtle warm glow behind the nav for depth */}
       <div
         aria-hidden
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-[55%] h-[65%] pointer-events-none"
+        className="absolute left-0 top-1/2 -translate-y-1/2 w-[55%] h-[65%] pointer-events-none mob:hidden"
         style={{
           background:
-            "radial-gradient(55% 55% at 30% 50%, rgba(198,138,58,0.08), rgba(59,42,34,0) 72%)",
+            "radial-gradient(55% 55% at 30% 50%, rgba(198,138,58,0.09), rgba(59,42,34,0) 72%)",
         }}
       />
 

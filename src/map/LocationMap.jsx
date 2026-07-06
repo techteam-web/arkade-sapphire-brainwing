@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { gsap, useGSAP } from "../gsap/gsapConfig.js";
 import { applyMapTheme, tweenMapTheme } from "./applyMapTheme.js";
 import { nightTheme, themeFor } from "./mapTheme.js";
-import { SITE, SITE_CAMERA, POIS, findPoi } from "./locationData.js";
+import { SITE, SITE_CAMERA, POIS, CATEGORIES, findPoi } from "./locationData.js";
 import baseStyle from "./arkade-style.json";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY ?? "";
@@ -71,6 +71,7 @@ async function fetchDirections(from, to) {
 export default function LocationMap({
   mapRef,
   activePoiId = null,
+  activeCategory = null,
   hoveredId = null,
   onSelect,
   onHover,
@@ -124,7 +125,7 @@ export default function LocationMap({
     setMode(next);
   });
 
-  // ── Selection → draw route (or clear) ────────────────────────────
+  // ── Selection → draw route (or clear). Owns the camera whenever a POI is active. ─
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !ready) return;
@@ -134,14 +135,6 @@ export default function LocationMap({
     if (!activePoiId) {
       src?.setData(EMPTY_FC);
       setRouteInfo(null);
-      map.easeTo({
-        center: [SITE.lng, SITE.lat],
-        zoom: SITE_CAMERA.zoom,
-        pitch: SITE_CAMERA.pitch,
-        bearing: SITE_CAMERA.bearing,
-        duration: 1500,
-        essential: true,
-      });
       return;
     }
 
@@ -186,6 +179,38 @@ export default function LocationMap({
       cancelled = true;
     };
   }, [activePoiId, ready]);
+
+  // ── Idle camera: no route active → frame the open category's pins, else the site. ─
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !ready || activePoiId) return; // the route effect owns the camera when a POI is active
+
+    const cat = activeCategory ? CATEGORIES.find((c) => c.id === activeCategory) : null;
+    if (cat) {
+      const pts = [[SITE.lng, SITE.lat], ...cat.pois.map((p) => [p.lng, p.lat])];
+      const bounds = pts.reduce(
+        (b, c) => b.extend(c),
+        new maplibregl.LngLatBounds(pts[0], pts[0])
+      );
+      map.fitBounds(bounds, {
+        padding: { top: 90, bottom: 90, left: 80, right: 80 },
+        duration: 1400,
+        pitch: 42,
+        bearing: -14,
+        maxZoom: 15.5,
+        essential: true,
+      });
+    } else {
+      map.easeTo({
+        center: [SITE.lng, SITE.lat],
+        zoom: SITE_CAMERA.zoom,
+        pitch: SITE_CAMERA.pitch,
+        bearing: SITE_CAMERA.bearing,
+        duration: 1400,
+        essential: true,
+      });
+    }
+  }, [activeCategory, activePoiId, ready]);
 
   // ── Animate the dash while a route is shown ──────────────────────
   useGSAP(
@@ -261,6 +286,8 @@ export default function LocationMap({
           const isActive = activePoiId === poi.id;
           const isHover = hoveredId === poi.id;
           const lifted = isActive || isHover;
+          // Dim pins outside the open category so the focus reads clearly.
+          const dimmed = activeCategory && poi.category !== activeCategory && !isActive;
           return (
             <Marker key={poi.id} longitude={poi.lng} latitude={poi.lat} anchor="center">
               <button
@@ -269,7 +296,8 @@ export default function LocationMap({
                 onClick={() => toggle(poi.id)}
                 onMouseEnter={() => onHover?.(poi.id)}
                 onMouseLeave={() => onHover?.(null)}
-                className="relative flex flex-col items-center bg-transparent border-0 p-0"
+                style={{ opacity: dimmed ? 0.25 : 1 }}
+                className="relative flex flex-col items-center bg-transparent border-0 p-0 transition-opacity duration-500"
                 aria-label={poi.place}
               >
                 <span
@@ -304,31 +332,31 @@ export default function LocationMap({
         className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-espresso/55 to-transparent pointer-events-none z-10"
       />
 
-      {/* Route info card */}
+      {/* Route info card — compact on phones so it never smothers the small map */}
       {routeInfo && (
-        <div className="absolute left-6 top-6 z-20 w-72 bg-espresso/85 border border-gold/30 backdrop-blur-md px-5 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-          <div className="flex items-start gap-3">
-            <span className="mt-1 w-8 h-8 rounded-full border border-gold/60 bg-gold/10 flex items-center justify-center shrink-0">
+        <div className="absolute left-6 top-6 z-20 w-72 bg-espresso/85 border border-gold/30 backdrop-blur-md px-5 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] mob:left-3 mob:top-3 mob:w-56 mob:px-3 mob:py-2.5">
+          <div className="flex items-start gap-3 mob:gap-2">
+            <span className="mt-1 w-8 h-8 rounded-full border border-gold/60 bg-gold/10 flex items-center justify-center shrink-0 mob:hidden">
               <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M3 11l19-9-9 19-2-8-8-2z" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-[0.55rem] tracking-[0.28em] uppercase text-silver/80">
+              <p className="text-[0.55rem] tracking-[0.28em] uppercase text-silver/80 mob:text-[0.48rem] mob:tracking-[0.2em]">
                 From Arkade Sapphire
               </p>
-              <h3 className="mt-1 font-display text-paper text-lg leading-tight truncate">
+              <h3 className="mt-1 font-display text-paper text-lg leading-tight truncate mob:mt-0.5 mob:text-sm">
                 {routeInfo.poi.place}
               </h3>
-              <div className="mt-3 flex items-center gap-5">
+              <div className="mt-3 flex items-center gap-5 mob:mt-1.5 mob:gap-3">
                 <div>
-                  <p className="text-[0.5rem] tracking-[0.24em] uppercase text-silver/70">Distance</p>
-                  <p className="text-paper text-sm mt-0.5 tabular-nums">{routeInfo.distanceKm} km</p>
+                  <p className="text-[0.5rem] tracking-[0.24em] uppercase text-silver/70 mob:tracking-[0.16em]">Distance</p>
+                  <p className="text-paper text-sm mt-0.5 tabular-nums mob:text-xs mob:mt-0">{routeInfo.distanceKm} km</p>
                 </div>
-                <span className="w-px h-7 bg-platinum/20" />
+                <span className="w-px h-7 bg-platinum/20 mob:h-5" />
                 <div>
-                  <p className="text-[0.5rem] tracking-[0.24em] uppercase text-silver/70">Drive</p>
-                  <p className="text-gold text-sm mt-0.5">{routeInfo.poi.time}</p>
+                  <p className="text-[0.5rem] tracking-[0.24em] uppercase text-silver/70 mob:tracking-[0.16em]">Drive</p>
+                  <p className="text-gold text-sm mt-0.5 mob:text-xs mob:mt-0">{routeInfo.poi.time}</p>
                 </div>
               </div>
             </div>
@@ -337,9 +365,9 @@ export default function LocationMap({
               data-interactive
               onClick={() => onSelect?.(null)}
               aria-label="Clear route"
-              className="w-7 h-7 rounded-full border border-platinum/25 flex items-center justify-center text-platinum/70 hover:text-paper hover:border-gold/60 transition-colors shrink-0"
+              className="w-7 h-7 rounded-full border border-platinum/25 flex items-center justify-center text-platinum/70 hover:text-paper hover:border-gold/60 transition-colors shrink-0 mob:w-5 mob:h-5"
             >
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 mob:w-3 mob:h-3" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
               </svg>
             </button>

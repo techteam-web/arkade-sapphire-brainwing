@@ -16,6 +16,12 @@ export default function PersistentChrome({ bootActive }) {
   const muteVisible = !isLanding;
   const showMenuLink = !isLanding && !isMenu;
 
+  // A soft halo behind the logo so it stays legible on any render WITHOUT laying
+  // a filter-like gradient over the image — light halo on dark pages, dark on paper.
+  const logoShadow = onPaper
+    ? "drop-shadow(0 1px 3px rgba(255,255,255,0.85)) drop-shadow(0 2px 14px rgba(255,255,255,0.5))"
+    : "drop-shadow(0 1px 3px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.45))";
+
   return (
     <div className="pointer-events-none fixed inset-0 z-40">
       {!isLanding && (
@@ -30,24 +36,35 @@ export default function PersistentChrome({ bootActive }) {
             src={onPaper ? "/arkade-logo.webp" : "/arkade-logo-light.webp"}
             alt="Arkade Sapphire"
             draggable="false"
+            style={{ filter: logoShadow }}
             className="h-5 2xl:h-6 3xl:h-7 w-auto max-w-[46vw] object-contain select-none"
           />
         </button>
       )}
 
-      <div className="pointer-events-auto absolute top-8 right-10 flex items-center gap-6 mob:top-5 mob:right-5 mob:gap-4">
-        {showMenuLink && (
-          <button
-            type="button"
-            data-interactive
-            onClick={() => navigateTo("/menu")}
-            className={`bg-transparent border-0 p-0 text-[0.65rem] tracking-[0.32em] uppercase ${tone} hover:text-gold transition-colors`}
-          >
-            Menu
-          </button>
-        )}
-        {muteVisible && <MuteToggle />}
-      </div>
+      {/* MENU + mute live in a small glass pill — keeps them clearly legible on
+          any render while leaving the image itself completely un-filtered. */}
+      {(showMenuLink || muteVisible) && (
+        <div
+          className={`pointer-events-auto absolute top-6 right-10 flex items-center gap-1 rounded-full border px-1.5 py-1 shadow-sm backdrop-blur-md mob:top-4 mob:right-5 ${
+            onPaper
+              ? "border-ink/15 bg-paper/55"
+              : "border-paper/20 bg-espresso/40"
+          }`}
+        >
+          {showMenuLink && (
+            <button
+              type="button"
+              data-interactive
+              onClick={() => navigateTo("/menu")}
+              className={`rounded-full bg-transparent border-0 px-3.5 py-1.5 pr-3 text-[0.65rem] tracking-[0.32em] uppercase ${tone} hover:text-gold transition-colors`}
+            >
+              Menu
+            </button>
+          )}
+          {muteVisible && <MuteToggle onPaper={onPaper} />}
+        </div>
+      )}
     </div>
   );
 }

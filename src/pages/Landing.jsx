@@ -14,7 +14,7 @@ export default function Landing() {
 
   useGSAP(
     () => {
-      gsap.set(imgWrapRef.current, { clipPath: "inset(0% 0% 0% 100%)" });
+      gsap.set(imgWrapRef.current, { opacity: 0 });
       gsap.set(heroImgRef.current, { scale: 1.22 });
       gsap.set([logoRef.current, taglineRef.current, ctaRef.current], {
         opacity: 0,
@@ -22,8 +22,8 @@ export default function Landing() {
       });
 
       const tl = gsap.timeline({ delay: 0.25 });
-      tl.to(imgWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "auraExpo" }, 0)
-        .to(heroImgRef.current, { scale: 1, duration: 2.0, ease: "auraExpo" }, 0)
+      tl.to(imgWrapRef.current, { opacity: 1, duration: 1.6, ease: "power2.out" }, 0)
+        .to(heroImgRef.current, { scale: 1, duration: 2.2, ease: "auraExpo" }, 0)
         .to(logoRef.current, { opacity: 1, y: 0, duration: 0.9, ease: "auraExpo" }, 0.5)
         .to(taglineRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "auraExpo" }, 0.75)
         .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "auraExpo" }, 0.9)
@@ -47,30 +47,47 @@ export default function Landing() {
 
   return (
     <main ref={rootRef} className="relative w-screen h-screen overflow-hidden bg-espresso">
-      {/* Full-height hero render — bleeds off the right edge on desktop, goes
-          full-bleed behind the content on phones. */}
-      <div
-        ref={imgWrapRef}
-        className="absolute top-0 right-0 bottom-0 w-[52%] overflow-hidden mob:inset-0 mob:w-full"
-      >
+      {/* Full-bleed hero render covering the entire viewport. */}
+      <div ref={imgWrapRef} className="absolute inset-0 overflow-hidden">
         <img
           ref={heroImgRef}
           src="/aminities/twilight.webp"
           alt="Arkade Sapphire at twilight"
           draggable="false"
-          className="edge-fade w-full h-full object-cover select-none"
+          className="w-full h-full object-cover select-none"
         />
-        {/* Phone-only bottom scrim for text legibility */}
-        <div className="hidden mob:block absolute inset-0 pointer-events-none bg-linear-to-t from-espresso via-espresso/55 to-espresso/10" />
       </div>
+
+      {/* Evoke-style gradient — deep on the left & top-left, fading to clear over
+          the render on the right so the building stays crisp. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none mob:hidden"
+        style={{
+          background: [
+            "linear-gradient(105deg, rgba(24,16,14,0.95) 0%, rgba(38,26,21,0.86) 20%, rgba(43,29,23,0.55) 38%, rgba(43,29,23,0.16) 54%, rgba(43,29,23,0) 68%)",
+            "radial-gradient(85% 80% at 0% 0%, rgba(18,11,10,0.55), rgba(18,11,10,0) 58%)",
+            "linear-gradient(to top, rgba(24,16,14,0.5) 0%, rgba(24,16,14,0) 30%)",
+          ].join(", "),
+        }}
+      />
+      {/* Phone gradient — anchored to the bottom where the content sits. */}
+      <div
+        aria-hidden
+        className="hidden mob:block absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(24,16,14,0.94) 0%, rgba(30,20,18,0.72) 26%, rgba(43,29,23,0.2) 52%, rgba(43,29,23,0) 74%)",
+        }}
+      />
 
       {/* Subtle warm glow behind the wordmark for depth */}
       <div
         aria-hidden
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-[55%] h-[60%] pointer-events-none"
+        className="absolute left-0 top-1/2 -translate-y-1/2 w-[55%] h-[60%] pointer-events-none mob:hidden"
         style={{
           background:
-            "radial-gradient(55% 55% at 32% 50%, rgba(198,138,58,0.09), rgba(59,42,34,0) 72%)",
+            "radial-gradient(55% 55% at 32% 50%, rgba(198,138,58,0.10), rgba(59,42,34,0) 72%)",
         }}
       />
 
