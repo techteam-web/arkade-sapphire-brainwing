@@ -19,6 +19,7 @@ import Showcase from "./pages/Showcase.jsx";
 
 function readBooted() {
   try {
+    if (new URLSearchParams(window.location.search).has("noboot")) return true;
     return sessionStorage.getItem("aura.booted") === "1";
   } catch {
     return false;

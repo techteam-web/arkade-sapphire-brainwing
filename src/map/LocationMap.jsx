@@ -12,13 +12,16 @@ const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY ?? "";
 
 const EMPTY_FC = { type: "FeatureCollection", features: [] };
 
-// Route colours — deliberately NOT gold: the basemap's primary/motorway roads are
-// gold, so the connectivity line uses a luminous aqua-teal that reads clearly against
-// both the night (espresso) and day (paper) palettes, with a near-white travelling dash.
-const ROUTE = "#2FE0C4";
-const ROUTE_DASH = "#EAFFF9";
+// Route theme coloring — Day optimized for a vivid Google Maps style blue
+const ROUTE_NIGHT = "#2FE0C4";
+const ROUTE_DAY = "#1A73E8"; 
 
-// Dash-offset frames — walked in sequence to animate the "travelling" gold dash.
+const ROUTE_DASH_NIGHT = "#EAFFF9"; 
+const ROUTE_DASH_DAY = "#0D47A1";
+
+const routeColor = (m) => (m === "day" ? ROUTE_DAY : ROUTE_NIGHT);
+const dashColor = (m) => (m === "day" ? ROUTE_DASH_DAY : ROUTE_DASH_NIGHT);
+
 const DASH_SEQUENCE = [
   [0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5],
   [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0], [0, 0.5, 3, 3.5],
@@ -26,9 +29,6 @@ const DASH_SEQUENCE = [
   [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5],
 ];
 
-// Build the basemap style. If a MapTiler key is present we use MapTiler; otherwise
-// we fall back to OpenFreeMap — same OpenMapTiles schema + Noto Sans glyphs, no API
-// key required — so the map renders roads/buildings/labels out of the box.
 function buildStyle() {
   const raw = JSON.stringify(baseStyle);
   if (MAPTILER_KEY) {
@@ -43,7 +43,6 @@ function buildStyle() {
   return style;
 }
 
-// Straight great-circle-ish fallback so the connector still draws if OSRM is down.
 function haversineMeters(a, b) {
   const R = 6371000;
   const toRad = (d) => (d * Math.PI) / 180;
@@ -81,7 +80,7 @@ export default function LocationMap({
   const dashTweenRef = useRef(null);
   const [mode, setMode] = useState("night");
   const [ready, setReady] = useState(false);
-  const [routeInfo, setRouteInfo] = useState(null); // { poi, distanceKm }
+  const [routeInfo, setRouteInfo] = useState(null);
 
   const mapStyle = useMemo(() => buildStyle(), []);
 
@@ -97,35 +96,40 @@ export default function LocationMap({
         type: "line",
         source: "route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": ROUTE, "line-width": 18, "line-opacity": 0.28, "line-blur": 8 },
+        paint: { "line-color": routeColor(mode), "line-width": 18, "line-opacity": 0.28, "line-blur": 8 },
       });
       map.addLayer({
         id: "route-base",
         type: "line",
         source: "route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": ROUTE, "line-width": 4, "line-opacity": 0.95 },
+        paint: { "line-color": routeColor(mode), "line-width": 4, "line-opacity": 0.95 },
       });
       map.addLayer({
         id: "route-dash",
         type: "line",
         source: "route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": ROUTE_DASH, "line-width": 1.75, "line-opacity": 1, "line-dasharray": [0, 4, 3] },
+        paint: { "line-color": dashColor(mode), "line-width": 1.75, "line-opacity": 1, "line-dasharray": [0, 4, 3] },
       });
     }
     setReady(true);
-  }, []);
+  }, [mode]);
 
   const { contextSafe } = useGSAP(() => {}, { scope: rootRef });
 
   const setModeWithTween = contextSafe((next) => {
     if (next === mode) return;
-    tweenMapTheme(mapInstanceRef.current, themeFor(mode), themeFor(next));
+    const map = mapInstanceRef.current;
+    tweenMapTheme(map, themeFor(mode), themeFor(next));
+    const c = routeColor(next);
+    const dc = dashColor(next);
+    if (map?.getLayer("route-glow")) map.setPaintProperty("route-glow", "line-color", c);
+    if (map?.getLayer("route-base")) map.setPaintProperty("route-base", "line-color", c);
+    if (map?.getLayer("route-dash")) map.setPaintProperty("route-dash", "line-color", dc);
     setMode(next);
   });
 
-  // ── Selection → draw route (or clear). Owns the camera whenever a POI is active. ─
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !ready) return;
@@ -180,10 +184,9 @@ export default function LocationMap({
     };
   }, [activePoiId, ready]);
 
-  // ── Idle camera: no route active → frame the open category's pins, else the site. ─
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !ready || activePoiId) return; // the route effect owns the camera when a POI is active
+    if (!map || !ready || activePoiId) return;
 
     const cat = activeCategory ? CATEGORIES.find((c) => c.id === activeCategory) : null;
     if (cat) {
@@ -212,7 +215,6 @@ export default function LocationMap({
     }
   }, [activeCategory, activePoiId, ready]);
 
-  // ── Animate the dash while a route is shown ──────────────────────
   useGSAP(
     () => {
       const map = mapInstanceRef.current;
@@ -247,6 +249,18 @@ export default function LocationMap({
       }}
       className="relative w-full h-full overflow-hidden"
     >
+      <style dangerouslySetInnerHTML={{__html: `
+        ::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        * {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+      `}} />
+
       <Map
         initialViewState={{
           longitude: SITE.lng,
@@ -286,7 +300,6 @@ export default function LocationMap({
           const isActive = activePoiId === poi.id;
           const isHover = hoveredId === poi.id;
           const lifted = isActive || isHover;
-          // Dim pins outside the open category so the focus reads clearly.
           const dimmed = activeCategory && poi.category !== activeCategory && !isActive;
           return (
             <Marker key={poi.id} longitude={poi.lng} latitude={poi.lat} anchor="center">
@@ -309,7 +322,6 @@ export default function LocationMap({
                       : "w-2 h-2 bg-paper/80 ring-1 ring-gold/60"
                   }`}
                 />
-                {/* Tooltip */}
                 <span
                   className={`absolute bottom-full mb-2 whitespace-nowrap px-2 py-1 bg-espresso/90 border border-gold/40 text-[0.6rem] tracking-[0.18em] uppercase transition-all duration-300 ${
                     lifted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
@@ -326,13 +338,20 @@ export default function LocationMap({
         <AttributionControl compact position="bottom-left" />
       </Map>
 
-      {/* Top scrim for chrome legibility */}
+      {/* Top scrim */}
       <div
         aria-hidden
-        className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-espresso/55 to-transparent pointer-events-none z-10"
+        className="absolute top-0 left-0 right-0 h-20 bg-linear-to-b from-canvas/55 to-transparent pointer-events-none z-10"
+      />
+      
+      {/* Left-edge seam gradient */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none z-10 mob:hidden"
+        style={{ background: "linear-gradient(90deg, rgba(20,14,9,0.25) 0%, rgba(20,14,9,0) 14%)" }}
       />
 
-      {/* Route info card — compact on phones so it never smothers the small map */}
+      {/* Route info card */}
       {routeInfo && (
         <div className="absolute left-6 top-6 z-20 w-72 bg-espresso/85 border border-gold/30 backdrop-blur-md px-5 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] mob:left-3 mob:top-3 mob:w-56 mob:px-3 mob:py-2.5">
           <div className="flex items-start gap-3 mob:gap-2">
@@ -375,16 +394,19 @@ export default function LocationMap({
         </div>
       )}
 
-      {/* Day/night toggle (top on phones to clear the map attribution) */}
-      <div className="absolute bottom-6 right-6 flex gap-4 z-10 mob:bottom-auto mob:top-4">
+      {/* Day/night capsule switch */}
+      <div
+        className="absolute right-10 top-[4.6rem] z-20 flex items-center gap-[2px] rounded-full p-[0.4rem] backdrop-blur-md mob:left-4 mob:right-auto mob:top-16"
+        style={{ background: "rgba(20,16,12,0.55)", border: "1px solid rgba(214,161,105,0.3)" }}
+      >
         {["day", "night"].map((m) => (
           <button
             key={m}
             type="button"
             data-interactive
             onClick={() => setModeWithTween(m)}
-            className={`bg-transparent border-0 p-0 text-[0.7rem] tracking-[0.32em] uppercase transition-colors duration-300 ${
-              mode === m ? "text-gold" : "text-paper/70 hover:text-paper"
+            className={`rounded-full border-0 px-[1.4rem] py-[0.6rem] text-[0.7rem] font-bold uppercase tracking-[0.08em] transition-colors duration-300 ${
+              mode === m ? "bg-copperlite text-canvas" : "bg-transparent text-taupe2 hover:text-linen"
             }`}
           >
             {m}

@@ -16,6 +16,20 @@
   --font-display: "Bodoni Moda Variable", ui-serif, Georgia, serif;
   --font-sans:    "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
 
+  /* ── Redesign "espresso + copper" system (Gallery / Floor Plan / Location) ── */
+  --font-news:     "Newsreader Variable", ui-serif, Georgia, serif;
+  --font-manrope:  "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas:     #1c1712; /* deepest page background */
+  --color-copperlite: #d99a5c; /* primary copper accent */
+  --color-copperdeep: #cc8f52; /* logo mark / icons */
+  --color-cream:      #f7f2ea; /* headings */
+  --color-linen:      #f2ede6; /* primary text on dark */
+  --color-sand:       #d8cdc0; /* secondary text */
+  --color-clay:       #c9a97e; /* active-row subtitle */
+  --color-taupe:      #9c9081; /* muted text */
+  --color-taupe2:     #8c8072; /* muted text 2 */
+
   --breakpoint-md:  768px;
   --breakpoint-lg:  1024px;
   --breakpoint-xl:  1280px;
