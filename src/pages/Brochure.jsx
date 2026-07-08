@@ -3,6 +3,10 @@ import { gsap, useGSAP } from "../gsap/gsapConfig.js";
 
 const BROCHURE_PDF = "/Arkade-Sapphire-Brochure.pdf";
 
+// Same espresso radial gradient the Floorplan / Location sidebars use — a warm
+// glow from the top-left falling off into deep espresso.
+const PAGE_BG = "radial-gradient(140% 100% at 0% 0%, #33251c 0%, #201510 65%)";
+
 export default function Brochure() {
   const rootRef = useRef(null);
   const coverRef = useRef(null);
@@ -79,7 +83,11 @@ export default function Brochure() {
   };
 
   return (
-    <main ref={rootRef} className="relative w-screen h-screen overflow-hidden bg-espresso">
+    <main
+      ref={rootRef}
+      className="relative w-screen h-screen overflow-hidden bg-espresso"
+      style={{ background: PAGE_BG }}
+    >
       <div className="absolute inset-x-20 top-20 bottom-16 grid grid-cols-12 gap-14 items-center mob:flex mob:flex-col mob:justify-center mob:inset-x-6 mob:top-16 mob:bottom-6 mob:gap-8">
         {/* Cover */}
         <section className="col-span-6 flex items-center justify-center mob:order-1">

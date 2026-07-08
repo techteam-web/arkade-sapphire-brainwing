@@ -123,22 +123,40 @@ export default function Menu() {
         </ul>
       </div>
 
-      {/* Arkade Aura — opens the render showcase */}
-      <button
-        type="button"
-        data-interactive
-        onClick={() => setAuraOpen(true)}
-        className="group absolute bottom-10 left-20 z-20 inline-flex items-center gap-3 border border-gold/45 bg-espresso/30 backdrop-blur-sm px-5 py-3 transition-colors duration-300 hover:border-gold hover:bg-gold/10 mob:bottom-6 mob:left-7 mob:px-4 mob:py-2.5"
-      >
-        <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span className="text-[0.7rem] tracking-[0.28em] uppercase text-paper/85 transition-colors group-hover:text-gold mob:text-[0.62rem]">
-          Arkade Aura
+      {/* Arkade Aura — opens the render showcase for a SEPARATE Arkade project.
+          A hover caption + external-link glyph flag that it leaves this tour so
+          it isn't mistaken for another section of Sapphire. */}
+      <div className="group absolute bottom-10 left-20 z-20 mob:bottom-6 mob:left-7">
+        <span className="pointer-events-none absolute -top-6 left-0 whitespace-nowrap text-[0.58rem] tracking-[0.22em] uppercase text-gold/90 opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 mob:text-[0.52rem]">
+          A different Arkade project ↗
         </span>
-      </button>
+        <button
+          type="button"
+          data-interactive
+          onClick={() => setAuraOpen(true)}
+          aria-label="Arkade Aura — opens a different Arkade project"
+          className="inline-flex items-center gap-3 border border-gold/45 bg-espresso/30 backdrop-blur-sm px-5 py-3 transition-colors duration-300 hover:border-gold hover:bg-gold/10 mob:px-4 mob:py-2.5"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="text-[0.7rem] tracking-[0.28em] uppercase text-paper/85 transition-colors group-hover:text-gold mob:text-[0.62rem]">
+            Arkade Aura
+          </span>
+          {/* external-link glyph — nudges out on hover */}
+          <svg
+            viewBox="0 0 24 24"
+            className="w-3.5 h-3.5 text-gold/70 transition-all duration-300 group-hover:text-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M7 17L17 7M17 7H8M17 7v9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
 
       <AuraShowcase open={auraOpen} onClose={() => setAuraOpen(false)} />
 

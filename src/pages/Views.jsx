@@ -1,72 +1,64 @@
-import { useRef, useState , useEffect } from "react";
-import { APP_DATA } from "../data"
+import { useRef, useEffect } from "react";
+import { APP_DATA } from "../data";
 import Marzipano from "marzipano";
-import { gsap, useGSAP } from "../gsap/gsapConfig.js";
 
+// Floor-plan eye icons open the Top pano aimed at one of four viewpoints:
+// the initial view (vp 0 = "12 o'clock") plus 90° clockwise steps
+// (vp 1 = 3, vp 2 = 6, vp 3 = 9). Yaw = initial yaw + vp · 90°.
+const HALF_PI = Math.PI / 2;
+const DEG = Math.PI / 180;
 
+// Balcony views are locked to a 100° arc — you can pan ±50° from the opened
+// viewpoint and no further.
+const HALF_LOCK = 50 * DEG;
+
+const normalizeYaw = (y) => Math.atan2(Math.sin(y), Math.cos(y)); // → [-π, π]
+
+// A yaw limiter that clamps to ±half around `center` using the SHORTEST-ARC
+// distance. This is what stops the "snap back to the start" glitch: Marzipano's
+// built-in yaw limit does a plain min/max clamp, which misbehaves when the arc
+// straddles the ±π seam (as several of these viewpoints do) and can fling the
+// camera to the far side. Measuring the signed shortest angle instead means the
+// view simply comes to rest at the edge and goes no further.
+const lockYaw = (center, half) => (params) => {
+  let diff = normalizeYaw(params.yaw - center);
+  if (diff > half) diff = half;
+  else if (diff < -half) diff = -half;
+  params.yaw = normalizeYaw(center + diff);
+  return params;
+};
+
+const composeLimiters = (a, b) => (params) => b(a(params));
+
+const TOP_SCENE_ID = "0-dji_0876_01"; // APP_DATA.scenes[0]
+const TILE_BASE_PATH = "/tiles";
+
+const getTileDirectoryName = (sceneId) => {
+  if (sceneId.endsWith("01")) return "01_DAY";
+  if (sceneId.endsWith("02")) return "02_DAY";
+  if (sceneId.endsWith("03") || sceneId.endsWith("3")) return "03_DAY";
+  return sceneId;
+};
 
 export default function Views() {
-
-  const FLOOR_DATA = [ 
-    {label: "Top" , day:"0-dji_0876_01" },
-    {label: "Middle" , day:"1-dji_0877_02" },
-    {label: "Bottom" , day:"2-dji_0878_3" }
-  ]
- 
-  const TILE_BASE_PATH = "/tiles"; 
-
-  const rootRef = useRef(null); // Connects to the HTML div
-  const panelRef = useRef(null); // Connects to the side menu panel
-  const autorotateRef = useRef(null); // Ref to store the autorotate configuration
-  const viewerRef = useRef(null);      // Stores the Marzipano Viewer instance
-  const scenesRef = useRef({});        // Stores all our created scenes
-
-  const [currentFloorIdx, setCurrentFloorIdx] = useState(0); // 0 is Terrace based on our array
-  const [isAutoRotating, setIsAutoRotating] = useState(false); // Auto-rotate toggle
-
-  const [currentSceneId, setCurrentSceneId] = useState(APP_DATA.scenes[0].id);
-
-  const getTileDirectoryName = (sceneId) => {
-    if (sceneId.endsWith("01")) return "01_DAY";
-    if (sceneId.endsWith("02")) return "02_DAY";
-    if (sceneId.endsWith("03") || sceneId.endsWith("3")) return "03_DAY";
-    return sceneId;
-  };
-
-  useGSAP(
-    () => {
-      gsap.set(panelRef.current, {
-        opacity: 0,
-        x: "-1.5rem",
-      });
-      const tl = gsap.to(panelRef.current, {
-        opacity: 1,
-        x: 0,
-        duration: 0.8,
-        delay: 0.25,
-        ease: "auraExpo",
-      });
-      return () => tl.kill();
-    },
-    { scope: rootRef }
-  );
+  const rootRef = useRef(null);
+  const viewerRef = useRef(null);
+  const scenesRef = useRef({});
 
   useEffect(() => {
-    
     if (!rootRef.current) return;
 
-    // 1. Initialize Viewer
-    const viewerOpts = { controls: { mouseViewMode: 'drag' } };
-    viewerRef.current = new Marzipano.Viewer(rootRef.current, viewerOpts);
-
-    //  Setup Autorotate movement
-    autorotateRef.current = Marzipano.autorotate({
-        yawSpeed: 0.05,        // Speed of rotation (adjust as needed)
-        targetPitch: 0,        // Looks straight ahead while rotating
-        targetFov: Math.PI / 2 // Standard zoom level
+    viewerRef.current = new Marzipano.Viewer(rootRef.current, {
+      controls: { mouseViewMode: "drag" },
     });
 
-    // 2. Create all scenes
+    // Centre of the 140° lock = the viewpoint we're opening (?vp=0..3), or the
+    // initial view when arrived without one.
+    const base = APP_DATA.scenes[0].initialViewParameters;
+    const vpRaw = new URLSearchParams(window.location.search).get("vp");
+    const vp = vpRaw !== null ? Math.min(3, Math.max(0, parseInt(vpRaw, 10) || 0)) : 0;
+    const centerYaw = normalizeYaw(base.yaw + vp * HALF_PI);
+
     APP_DATA.scenes.forEach((sceneData) => {
       const tileDir = getTileDirectoryName(sceneData.id);
       const source = Marzipano.ImageUrlSource.fromString(
@@ -74,19 +66,31 @@ export default function Views() {
         { cubeMapPreviewUrl: `${TILE_BASE_PATH}/${tileDir}/preview.jpg` }
       );
       const geometry = new Marzipano.CubeGeometry(sceneData.levels);
-      const limiter = Marzipano.RectilinearView.limit.traditional(sceneData.faceSize, 100 * Math.PI / 180, 120 * Math.PI / 180);
-      const view = new Marzipano.RectilinearView(sceneData.initialViewParameters, limiter);
+
+      let limiter = Marzipano.RectilinearView.limit.traditional(
+        sceneData.faceSize,
+        (100 * Math.PI) / 180,
+        (120 * Math.PI) / 180
+      );
+      // The Top pano is the only one shown; give it the 140° balcony lock.
+      const isTop = sceneData.id === TOP_SCENE_ID;
+      if (isTop) limiter = composeLimiters(limiter, lockYaw(centerYaw, HALF_LOCK));
+
+      const initParams = isTop
+        ? { yaw: centerYaw, pitch: base.pitch, fov: base.fov }
+        : sceneData.initialViewParameters;
+      const view = new Marzipano.RectilinearView(initParams, limiter);
 
       scenesRef.current[sceneData.id] = viewerRef.current.createScene({
-        source, geometry, view, pinFirstLevel: true // pinFirstLevel ensures the first / low level is always loaded
+        source,
+        geometry,
+        view,
+        pinFirstLevel: true,
       });
     });
 
-    // 3. Show initial scene (Terrace Day)
-    const initialSceneId = FLOOR_DATA[0].day;
-    if (scenesRef.current[initialSceneId]) {
-      scenesRef.current[initialSceneId].switchTo();
-    } 
+    scenesRef.current[TOP_SCENE_ID]?.switchTo();
+
     return () => {
       if (viewerRef.current) {
         viewerRef.current.destroy();
@@ -95,142 +99,5 @@ export default function Views() {
     };
   }, []);
 
-  const switchSceneSynced = ( newFloorIdx) => {
-    const viewer = viewerRef.current;
-    const oldScene = viewer.scene();
-    
-    // Look up the exact scene ID from our data array
-    const targetSceneId = FLOOR_DATA[newFloorIdx].day;
-    const newScene = scenesRef.current[targetSceneId];
-
-    if (oldScene && newScene) {
-        const oldView = oldScene.view();
-        newScene.view().setParameters({
-            yaw: oldView.yaw(),
-            pitch: oldView.pitch(),
-            fov: oldView.fov()
-        });
-
-        newScene.switchTo();
-        setCurrentFloorIdx(newFloorIdx);
-    } 
-  };
-
-   const switchSceneById = (sceneId) => {
-    const scene = scenesRef.current[sceneId];
-    if (!scene) return;
-
-    scene.switchTo();
-    setCurrentSceneId(sceneId);
-  };
-
-  // Toggle Auto Rotate
-  const toggleAutoRotate = () => {
-      const viewer = viewerRef.current;
-      if (!viewer || !autorotateRef.current) return;
-      if (isAutoRotating) {
-          viewer.stopMovement();
-          viewer.setIdleMovement(Infinity, null);
-      } else {
-          viewer.startMovement(autorotateRef.current);
-          viewer.setIdleMovement(3000, autorotateRef.current); 
-          // Restarts auto-rotate 3 seconds after user stops dragging
-      }
-      setIsAutoRotating(!isAutoRotating);
-  };
-
-  
-  return (
-    <main
-      ref={rootRef}
-      className="relative w-screen h-screen overflow-hidden bg-paper text-ink"
-    >
-      {/* Premium Side Menu */}
-      <aside
-        ref={panelRef}
-        className="absolute right-10 top-28 z-10 w-72 bg-paper/80 backdrop-blur-md border border-ink/5 p-8 rounded-lg flex flex-col gap-6 text-ink shadow-sm pointer-events-auto mob:right-3 mob:top-20 mob:w-40 mob:p-3.5 mob:gap-2.5 mob:rounded-md"
-      >
-        <div>
-          <span className="text-[0.65rem] tracking-[0.25em] uppercase text-silver font-medium block mb-1 mob:text-[0.5rem] mob:mb-0.5">
-            Interactive
-          </span>
-          <h1 className="font-display text-3xl leading-[1.05] tracking-[-0.01em] text-ink mob:text-base">
-            360° Views
-          </h1>
-        </div>
-
-        <span className="block h-px w-full bg-ink/10" />
-
-        <div className="flex flex-col gap-3">
-          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium mob:text-[0.5rem]">
-            Select Level
-          </span>
-          <div className="flex flex-col gap-1">
-            {FLOOR_DATA.map((floor, idx) => {
-              const isActive = idx === currentFloorIdx;
-              return (
-                <button
-                  key={floor.label}
-                  type="button"
-                  data-interactive
-                  onClick={() => switchSceneSynced(idx)}
-                  className="group relative border-0 bg-transparent py-2.5 pl-4 pr-2 text-left transition-all duration-300 flex items-center justify-between cursor-pointer mob:py-1.5 mob:pl-3"
-                >
-                  {/* Left active line accent */}
-                  <span
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-gold rounded transition-all duration-300 ${
-                      isActive
-                        ? "opacity-100 scale-y-100"
-                        : "opacity-0 scale-y-50 group-hover:opacity-50 group-hover:scale-y-75"
-                    }`}
-                  />
-                  <span
-                    className={`text-xs uppercase tracking-[0.15em] transition-colors duration-300 mob:text-[0.6rem] ${
-                      isActive
-                        ? "text-gold font-semibold"
-                        : "text-ink/60 group-hover:text-ink"
-                    }`}
-                  >
-                    {floor.label}
-                  </span>
-                  <span
-                    className={`text-[0.65rem] tracking-[0.05em] uppercase font-light transition-colors duration-300 mob:text-[0.5rem] ${
-                      isActive
-                        ? "text-gold"
-                        : "text-silver group-hover:text-ink/80"
-                    }`}
-                  >
-                    Day View
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <span className="block h-px w-full bg-ink/10" />
-
-        <div className="flex items-center justify-between">
-          <span className="text-[0.65rem] tracking-[0.15em] uppercase text-silver font-medium mob:text-[0.5rem]">
-            Auto Rotate
-          </span>
-          <button
-            type="button"
-            data-interactive
-            onClick={toggleAutoRotate}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              isAutoRotating ? "bg-gold" : "bg-ink/10"
-            }`}
-            aria-label="Toggle auto rotation"
-          >
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-paper shadow ring-0 transition duration-200 ease-in-out ${
-                isAutoRotating ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
-      </aside>
-    </main>
-  );
+  return <main ref={rootRef} className="relative h-screen w-screen overflow-hidden bg-canvas" />;
 }

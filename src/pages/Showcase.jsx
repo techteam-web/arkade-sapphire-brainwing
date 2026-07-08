@@ -2,6 +2,10 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "../gsap/gsapConfig.js";
 import PlaceholderMedia from "../components/PlaceholderMedia.jsx";
 
+// Same espresso radial gradient the Floorplan / Location sidebars use — a warm
+// glow from the top-left falling off into deep espresso.
+const PAGE_BG = "radial-gradient(140% 100% at 0% 0%, #33251c 0%, #201510 65%)";
+
 export default function Showcase() {
   const rootRef = useRef(null);
   const titleRef = useRef(null);
@@ -42,6 +46,7 @@ export default function Showcase() {
     <main
       ref={rootRef}
       className="relative w-screen h-screen overflow-hidden bg-cocoa"
+      style={{ background: PAGE_BG }}
     >
       <h1
         ref={titleRef}

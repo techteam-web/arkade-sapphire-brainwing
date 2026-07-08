@@ -3,18 +3,26 @@ import { useTransition } from "../context/transition.js";
 import MuteToggle from "./MuteToggle.jsx";
 
 export default function PersistentChrome({ bootActive }) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { navigateTo } = useTransition();
 
   if (bootActive) return null;
 
   const isLanding = pathname === "/";
   const isMenu = pathname === "/menu";
-  const onPaper = pathname === "/views";
+  const isViews = pathname === "/views";
+  const onPaper = isViews;
 
-  const tone = onPaper ? "text-ink" : "text-paper";
+  // The MENU / mute pill is always the dark espresso glass now, so its contents
+  // stay light on every page (incl. /views, whose panel is espresso too).
+  const tone = "text-paper";
   const muteVisible = !isLanding;
-  const showMenuLink = !isLanding && !isMenu;
+  const showMenuLink = !isLanding && !isMenu && !isViews;
+
+  // On the 360 view, the pill's action is "Back" (to the plan we arrived from,
+  // passed as ?from=<floorId>) rather than "Menu".
+  const backTarget = new URLSearchParams(search).get("from");
+  const goBack = () => navigateTo(backTarget ? `/floorplan?floor=${backTarget}` : "/menu");
 
   // A soft halo behind the logo so it stays legible on any render WITHOUT laying
   // a filter-like gradient over the image — light halo on dark pages, dark on paper.
@@ -44,25 +52,36 @@ export default function PersistentChrome({ bootActive }) {
 
       {/* MENU + mute live in a small glass pill — keeps them clearly legible on
           any render while leaving the image itself completely un-filtered. */}
-      {(showMenuLink || muteVisible) && (
+      {(showMenuLink || isViews || muteVisible) && (
         <div
-          className={`pointer-events-auto absolute top-6 right-10 flex items-center gap-1 rounded-full border px-1.5 py-1 shadow-sm backdrop-blur-md mob:top-4 mob:right-5 ${
-            onPaper
-              ? "border-ink/15 bg-paper/55"
-              : "border-paper/20 bg-espresso/40"
-          }`}
+          className="pointer-events-auto absolute top-6 right-10 flex items-center gap-1 rounded-full border border-paper/20 bg-espresso/40 px-1.5 py-1 shadow-sm backdrop-blur-md mob:top-4 mob:right-5"
         >
-          {showMenuLink && (
+          {isViews ? (
             <button
               type="button"
               data-interactive
-              onClick={() => navigateTo("/menu")}
-              className={`rounded-full bg-transparent border-0 px-3.5 py-1.5 pr-3 text-[0.65rem] tracking-[0.32em] uppercase ${tone} hover:text-gold transition-colors`}
+              onClick={goBack}
+              aria-label="Back to floor plan"
+              className={`flex items-center gap-1.5 rounded-full bg-transparent border-0 py-1.5 pl-3 pr-3.5 text-[0.65rem] tracking-[0.28em] uppercase ${tone} hover:text-gold transition-colors`}
             >
-              Menu
+              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Back
             </button>
+          ) : (
+            showMenuLink && (
+              <button
+                type="button"
+                data-interactive
+                onClick={() => navigateTo("/menu")}
+                className={`rounded-full bg-transparent border-0 px-3.5 py-1.5 pr-3 text-[0.65rem] tracking-[0.32em] uppercase ${tone} hover:text-gold transition-colors`}
+              >
+                Menu
+              </button>
+            )
           )}
-          {muteVisible && <MuteToggle onPaper={onPaper} />}
+          {muteVisible && <MuteToggle onPaper={false} />}
         </div>
       )}
     </div>

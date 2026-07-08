@@ -7,6 +7,7 @@ import { AudioProvider } from "./context/AudioContext.jsx";
 import BootLoader from "./components/BootLoader.jsx";
 import TransitionOverlay from "./components/TransitionOverlay.jsx";
 import PersistentChrome from "./components/PersistentChrome.jsx";
+import FullscreenGate from "./components/FullscreenGate.jsx";
 
 import Landing from "./pages/Landing.jsx";
 import Menu from "./pages/Menu.jsx";
@@ -53,6 +54,7 @@ export default function App() {
         alt="Brainwing logo"
         className="fixed bottom-4 right-4 w-36 z-50 pointer-events-none opacity-80 mob:w-24 mob:bottom-3 mob:right-3"
       />
+      <FullscreenGate />
     </TransitionProvider>
   );
 }

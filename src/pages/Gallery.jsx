@@ -8,6 +8,13 @@ const pad = (n) => String(n + 1).padStart(2, "0");
 // Toggle the ambient blurred backdrop.
 const AMBIENT_BLUR = true;
 
+// Darkening wash layered over the safety-net photo (set as the backdrop div's
+// own CSS background) so it matches the blurred img's brightness(0.55). Lives
+// in plain CSS with no GPU filter surface, so it ALWAYS fills every pixel —
+// even where a giant blur() gets clipped on high-DPI displays and would
+// otherwise reveal the canvas colour.
+const BACKDROP_WASH = "linear-gradient(rgba(20,16,12,0.42), rgba(20,16,12,0.42))";
+
 // Glass ghost-arrow (44px) — lightens border + fill on hover, no hue change.
 function NavArrow({ dir, onClick, label }) {
   const isPrev = dir < 0;
@@ -68,10 +75,21 @@ export default function Gallery() {
     });
   }, []);
 
+  // Paint a backdrop layer: the darkened photo goes on BOTH the blurred <img>
+  // (soft look) AND the layer div's own CSS background (a plain cover fill that
+  // uses no GPU filter surface, so it can never be clipped). If a giant blur()
+  // ever clips at the edges on a high-DPI screen, this fill still covers every
+  // pixel — canvas brown can no longer show through.
+  const paintBackdrop = (i, src) => {
+    const div = backLayers.current[i];
+    if (div) div.style.backgroundImage = `${BACKDROP_WASH}, url("${src}")`;
+    if (backImgs.current[i]) backImgs.current[i].src = src;
+  };
+
   useGSAP(
     () => {
       const fi = front.current;
-      backImgs.current[fi].src = GALLERY_IMAGES[0].src;
+      paintBackdrop(fi, GALLERY_IMAGES[0].src);
       foreImgs.current[fi].src = GALLERY_IMAGES[0].src;
 
       gsap.set(backLayers.current[fi], { autoAlpha: 1, zIndex: 1 });
@@ -104,7 +122,7 @@ export default function Gallery() {
     const bi = 1 - fi;
     const src = GALLERY_IMAGES[target].src;
 
-    backImgs.current[bi].src = src;
+    paintBackdrop(bi, src);
     foreImgs.current[bi].src = src;
 
     gsap.set(backLayers.current[bi], { autoAlpha: 0, zIndex: 1 });
@@ -157,7 +175,12 @@ export default function Gallery() {
           key={`b${i}`}
           ref={(el) => (backLayers.current[i] = el)}
           className="absolute inset-0 z-0 overflow-hidden"
-          style={{ visibility: "hidden" }}
+          style={{
+            visibility: "hidden",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
         >
           <img
             ref={(el) => (backImgs.current[i] = el)}
