@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "../gsap/gsapConfig.js";
+import { useAudio } from "../context/audio.js";
 
 // Espresso hero gradient + faint copper glow, matching the tour's other pages.
 const GATE_BG =
@@ -16,6 +17,8 @@ const isFullscreen = () =>
   !!(document.fullscreenElement || document.webkitFullscreenElement);
 
 export default function FullscreenGate() {
+  const { start } = useAudio();
+
   // If the browser can't do the Fullscreen API (e.g. iOS Safari), never gate —
   // otherwise the user could get stuck behind a prompt they can never satisfy.
   // `?noboot` also disables it (shared debug bypass, same as the boot loader).
@@ -122,6 +125,10 @@ export default function FullscreenGate() {
   useEffect(() => () => sweepTlRef.current?.kill(), []);
 
   const enter = () => {
+    // Start the score first: it has to run inside this click, and it should play
+    // even if the browser then refuses the fullscreen request.
+    start();
+
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen;
     try {
