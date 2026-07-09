@@ -1,20 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "../gsap/gsapConfig.js";
 import { useAudio } from "../context/audio.js";
+import { canFullscreen, isFullscreen, onFullscreenChange } from "../utils/fullscreen.js";
 
 // Espresso hero gradient + faint copper glow, matching the tour's other pages.
 const GATE_BG =
   "radial-gradient(130% 110% at 50% 12%, #3a2a20 0%, #241a14 46%, #1c1712 74%)";
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
-
-const canFullscreen = () =>
-  typeof document !== "undefined" &&
-  !!(document.documentElement.requestFullscreen ||
-    document.documentElement.webkitRequestFullscreen);
-
-const isFullscreen = () =>
-  !!(document.fullscreenElement || document.webkitFullscreenElement);
 
 export default function FullscreenGate() {
   const { start } = useAudio();
@@ -43,13 +36,7 @@ export default function FullscreenGate() {
   // Re-open the gate whenever fullscreen is left — by Esc, F-keys, gestures, etc.
   useEffect(() => {
     if (!supported) return;
-    const onChange = () => setOpen(!isFullscreen());
-    document.addEventListener("fullscreenchange", onChange);
-    document.addEventListener("webkitfullscreenchange", onChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onChange);
-      document.removeEventListener("webkitfullscreenchange", onChange);
-    };
+    return onFullscreenChange(() => setOpen(!isFullscreen()));
   }, [supported]);
 
   // Loops a diagonal light-sweep across the gold button to keep drawing the eye.
