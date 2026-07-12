@@ -44,9 +44,9 @@ const HAIRLINE = "rgba(214,161,105,0.18)";
 const ACTIVE_ROW = "rgba(214,161,105,0.12)";
 
 const FLOOR_DATA = [
-  { label: "Top", day: "0-dji_0876_01" },
-  { label: "Middle", day: "1-dji_0877_02" },
-  { label: "Bottom", day: "2-dji_0878_3" },
+  { label: "Top", height: "42 m", floor: "13th Floor", day: "0-dji_0876_01" },
+  { label: "Middle", height: "32 m", floor: "10th Floor", day: "1-dji_0877_02" },
+  { label: "Bottom", height: "23 m", floor: "7th Floor", day: "2-dji_0878_3" },
 ];
 
 const TOP_SCENE_ID = FLOOR_DATA[0].day; // APP_DATA.scenes[0]
@@ -231,14 +231,14 @@ export default function Views() {
                           : "font-medium text-sand group-hover:text-cream"
                       }`}
                     >
-                      {floor.label}
+                      {floor.height}
                     </span>
                     <span
                       className={`shrink-0 text-[0.75rem] uppercase tracking-[0.08em] mob:text-[0.55rem] ${
                         isActive ? "text-clay" : "text-taupe2"
                       }`}
                     >
-                      Day View
+                      {floor.floor}
                     </span>
                   </button>
                 );
