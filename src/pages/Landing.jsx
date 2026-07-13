@@ -51,7 +51,7 @@ export default function Landing() {
       <div ref={imgWrapRef} className="absolute inset-0 overflow-hidden">
         <img
           ref={heroImgRef}
-          src="/aminities/twilight.webp"
+          src="/hero/twilight-final.webp"
           alt="Arkade Sapphire at twilight"
           draggable="false"
           className="w-full h-full object-cover select-none"

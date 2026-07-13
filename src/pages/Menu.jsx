@@ -59,7 +59,7 @@ export default function Menu() {
       <div ref={imgWrapRef} className="absolute inset-0 overflow-hidden">
         <img
           ref={heroImgRef}
-          src="/aminities/golden-hour.webp"
+          src="/hero/golden-hour-final.webp"
           alt="Arkade Sapphire"
           draggable="false"
           className="w-full h-full object-cover select-none"
