@@ -1,13 +1,20 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { gsap, useGSAP } from "../gsap/gsapConfig.js";
+import BrochureViewer from "../components/BrochureViewer.jsx";
 
 const BROCHURE_PDF = "/Arkade-Sapphire-Brochure.pdf";
+
+// Kept in step with the file in public/ — see the Ghostscript pass in the repo
+// history if it is ever re-exported.
+const PAGE_COUNT = 23;
+const FILE_SIZE = "8 MB";
 
 // Same espresso radial gradient the Floorplan / Location sidebars use — a warm
 // glow from the top-left falling off into deep espresso.
 const PAGE_BG = "radial-gradient(140% 100% at 0% 0%, #33251c 0%, #201510 65%)";
 
 export default function Brochure() {
+  const [viewerOpen, setViewerOpen] = useState(false);
   const rootRef = useRef(null);
   const coverRef = useRef(null);
   const coverInner = useRef(null);
@@ -82,6 +89,15 @@ export default function Brochure() {
     gsap.to(glareRef.current, { opacity: 0, duration: 0.5, ease: "auraEase" });
   };
 
+  const downloadPdf = () => {
+    const a = document.createElement("a");
+    a.href = BROCHURE_PDF;
+    a.download = "Arkade-Sapphire-Brochure.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
   return (
     <main
       ref={rootRef}
@@ -151,27 +167,26 @@ export default function Brochure() {
             ref={metaRef}
             className="mt-8 flex items-center gap-6 text-[0.6rem] tracking-[0.32em] uppercase text-silver/70"
           >
-            <span>23 Pages</span>
+            <span>{PAGE_COUNT} Pages</span>
             <span className="w-px h-3 bg-platinum/20" />
             <span>PDF</span>
             <span className="w-px h-3 bg-platinum/20" />
-            <span>16 MB</span>
+            <span>{FILE_SIZE}</span>
           </div>
 
           <div ref={ctaRef} className="mt-10 flex items-center gap-4 mob:mt-7 mob:flex-wrap mob:justify-center">
-            <a
-              href={BROCHURE_PDF}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
               data-interactive
-              className="inline-flex items-center gap-3 bg-gold text-espresso px-8 py-3 text-[0.7rem] tracking-[0.32em] uppercase hover:bg-paper transition-colors duration-300"
+              onClick={() => setViewerOpen(true)}
+              className="inline-flex items-center gap-3 border-0 bg-gold text-espresso px-8 py-3 text-[0.7rem] tracking-[0.32em] uppercase hover:bg-paper transition-colors duration-300"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" strokeLinecap="round" strokeLinejoin="round" />
                 <circle cx="12" cy="12" r="2.5" />
               </svg>
               View Brochure
-            </a>
+            </button>
             <a
               href={BROCHURE_PDF}
               download="Arkade-Sapphire-Brochure.pdf"
@@ -186,6 +201,13 @@ export default function Brochure() {
           </div>
         </section>
       </div>
+
+      <BrochureViewer
+        open={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        src={BROCHURE_PDF}
+        onDownload={downloadPdf}
+      />
     </main>
   );
 }

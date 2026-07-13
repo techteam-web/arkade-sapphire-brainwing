@@ -91,7 +91,9 @@ export default function Floorplan() {
     ["Carpet", activeFloor.carpet],
     ["Deck", activeFloor.deck],
     ["Total Area", totalArea],
-    ["Configuration", activeFloor.config],
+    // Configuration row is dropped entirely when a plan has no config
+    // (e.g. commercial shop unit plans).
+    ...(activeFloor.config ? [["Configuration", activeFloor.config]] : []),
   ];
 
   return (
@@ -180,9 +182,11 @@ export default function Floorplan() {
                         >
                           {f.name}
                         </span>
-                        <span className={`text-[1.1rem] ${isActive ? "text-clay" : "text-taupe2"}`}>
-                          {f.config}
-                        </span>
+                        {f.config && (
+                          <span className={`text-[1.1rem] ${isActive ? "text-clay" : "text-taupe2"}`}>
+                            {f.config}
+                          </span>
+                        )}
                       </button>
                     );
                   })}

@@ -98,7 +98,7 @@ export default function Landing() {
           src="/arkade-logo-light.webp"
           alt="Arkade Sapphire"
           draggable="false"
-          className="w-full max-w-lg 2xl:max-w-xl h-auto object-contain select-none mob:max-w-[78vw]"
+          className="w-full max-w-2xl 2xl:max-w-3xl h-auto object-contain select-none mob:max-w-[88vw]"
         />
 
         <p ref={taglineRef} className="mt-7 max-w-md text-sm leading-relaxed text-platinum/70 mob:mt-5">

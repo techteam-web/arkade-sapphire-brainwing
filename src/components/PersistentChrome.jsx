@@ -45,7 +45,7 @@ export default function PersistentChrome({ bootActive }) {
             alt="Arkade Sapphire"
             draggable="false"
             style={{ filter: logoShadow }}
-            className="h-5 2xl:h-6 3xl:h-7 w-auto max-w-[46vw] object-contain select-none"
+            className="h-8 2xl:h-10 3xl:h-12 mob:h-6 w-auto max-w-[46vw] object-contain select-none"
           />
         </button>
       )}
