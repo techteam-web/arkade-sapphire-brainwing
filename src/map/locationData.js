@@ -12,8 +12,8 @@ export const SITE = {
   id: "arkade-sapphire",
   name: "Arkade Sapphire",
   // S.V. Road, Santacruz West (near Santacruz station / Khira Nagar).
-  lng: 72.8402,
-  lat: 19.0812,
+  lng: 72.839833,
+  lat: 19.082165,
 };
 
 export const SITE_CAMERA = {
