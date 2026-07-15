@@ -109,8 +109,8 @@ export const CATEGORIES = [
     label: "Lifestyle",
     pois: [
       { id: "high-street-linking-road", place: "High Street Retail, Linking Road", time: "6 mins", lng: 72.83439, lat: 19.07807 },
-      { id: "willingdon-gymkhana", place: "Willingdon Gymkhana", time: "4 mins", lng: 72.828, lat: 19.09 },
-      { id: "khar-gymkhana", place: "Khar Gymkhana", time: "6 mins", lng: 72.83161, lat: 19.0704 },
+      { id: "willingdon-gymkhana", place: "Willingdon Gymkhana", time: "4 mins", lng: 72.84034679099874, lat: 19.074836192851542 },
+      { id: "khar-gymkhana", place: "Khar Gymkhana", time: "6 mins", lng: 72.83180755051872, lat: 19.070957541072886 },
       { id: "taj-santacruz", place: "Taj Santacruz", time: "10 mins", lng: 72.8544, lat: 19.09269 },
       { id: "grand-hyatt", place: "Grand Hyatt", time: "10 mins", lng: 72.85144, lat: 19.07753 },
     ],

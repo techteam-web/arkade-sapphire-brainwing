@@ -7,7 +7,7 @@ const BROCHURE_PDF = "/Arkade-Sapphire-Brochure.pdf";
 // Kept in step with the file in public/ — see the Ghostscript pass in the repo
 // history if it is ever re-exported.
 const PAGE_COUNT = 23;
-const FILE_SIZE = "8 MB";
+const FILE_SIZE = "3.5 MB";
 
 // Same espresso radial gradient the Floorplan / Location sidebars use — a warm
 // glow from the top-left falling off into deep espresso.
