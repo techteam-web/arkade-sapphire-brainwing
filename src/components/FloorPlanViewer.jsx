@@ -43,15 +43,18 @@ export default function FloorPlanViewer({ src, alt, hotspots = [], onHotspot }) 
             wrapperClass="!h-full !w-full"
             contentClass="!h-full !w-full !flex !items-center !justify-center"
           >
-            {/* Wrapper hugs the image so hotspot %s map to the plan itself. */}
-            <div className="relative inline-block" style={{ maxWidth: "88%", maxHeight: "92%" }}>
+            {/* Wrapper hugs the image so hotspot %s map to the plan itself.
+                The image height is capped in viewport units sized to the plan
+                column at each breakpoint (≈90vh on desktop, ≈44vh in the 54vh
+                mobile pane) so tall portrait plans always fit in full — never
+                cropped top or bottom — while width stays bounded by the column. */}
+            <div className="relative inline-block max-h-full max-w-full">
               <img
                 src={src}
                 alt={alt}
-                className="block max-h-full max-w-full select-none object-contain"
+                className="block max-h-[88vh] max-w-full select-none object-contain mob:max-h-[44vh]"
                 draggable="false"
                 style={{
-                  maxHeight: "92vh",
                   borderRadius: "6px",
                   border: "1px solid rgba(214,161,105,0.2)",
                   boxShadow: "0 26px 50px -12px rgba(0,0,0,0.6)",
