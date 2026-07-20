@@ -36,12 +36,19 @@ export default function Floorplan() {
 
   // Collapse the flat floor list into consecutive runs sharing a `group` (wing)
   // so the nav can render static "A Wing / B Wing / C Wing" sub-heads. Floors
-  // with no group (commercial) fall into a single unlabelled run.
+  // with no group (commercial / eco deck) fall into a single unlabelled run.
   const wingGroups = [];
   category.floors.forEach((f) => {
-    const last = wingGroups[wingGroups.length - 1];
-    if (last && last.label === (f.group ?? null)) last.floors.push(f);
-    else wingGroups.push({ label: f.group ?? null, floors: [f] });
+    const label = f.group ?? null;
+    let grp = wingGroups[wingGroups.length - 1];
+    if (!grp || grp.label !== label) {
+      grp = { label, floors: [], wingPlan: null };
+      wingGroups.push(grp);
+    }
+    // Wing-level sheets aren't list rows — they hang off the wing sub-head as
+    // a "View Floor Plan" button.
+    if (f.wingPlan) grp.wingPlan = f;
+    else grp.floors.push(f);
   });
 
   // Total area ≈ carpet + deck (usable). Swap in real saleable/built-up figures
@@ -87,12 +94,18 @@ export default function Floorplan() {
     { dependencies: [floorId], scope: rootRef }
   );
 
+  // Wing-level sheets and the Eco Deck cut-sections carry no unit areas, so the
+  // stat block drops away entirely rather than printing a column of em-dashes.
+  // Configuration is likewise dropped when a plan has no config (shop plans).
+  const hasAreas = sqft(activeFloor.carpet) > 0;
   const stats = [
-    ["Carpet", activeFloor.carpet],
-    ["Deck", activeFloor.deck],
-    ["Total Area", totalArea],
-    // Configuration row is dropped entirely when a plan has no config
-    // (e.g. commercial shop unit plans).
+    ...(hasAreas
+      ? [
+          ["Carpet", activeFloor.carpet],
+          ["Deck", activeFloor.deck],
+          ["Total Area", totalArea],
+        ]
+      : []),
     ...(activeFloor.config ? [["Configuration", activeFloor.config]] : []),
   ];
 
@@ -125,8 +138,10 @@ export default function Floorplan() {
         </h1>
 
         <div ref={panelRef} className="mt-[2rem] flex min-h-0 flex-1 flex-col mob:mt-4">
-          {/* Tabs — Residential / Commercial with sliding copper underline */}
-          <div className="flex gap-[2.2rem]" style={{ borderBottom: `1px solid ${HAIRLINE}` }}>
+          {/* Tabs — Residential / Commercial / Eco Deck with sliding copper
+              underline. Three labels are tight on a 360px phone, so the type
+              and gaps step down at the mob breakpoint to keep them on one row. */}
+          <div className="flex gap-[1.4rem] mob:gap-2.5" style={{ borderBottom: `1px solid ${HAIRLINE}` }}>
             {CATEGORIES.map((c) => {
               const isActive = c.id === categoryId;
               return (
@@ -135,7 +150,7 @@ export default function Floorplan() {
                   type="button"
                   data-interactive
                   onClick={() => handleCategory(c.id)}
-                  className={`relative -mb-px bg-transparent p-0 pb-[1rem] text-[1.2rem] font-bold uppercase tracking-[0.1em] transition-colors duration-300 ${
+                  className={`relative -mb-px shrink-0 whitespace-nowrap bg-transparent p-0 pb-[1rem] text-[1.05rem] font-bold uppercase tracking-[0.08em] transition-colors duration-300 mob:pb-2.5 mob:text-[0.8rem] mob:tracking-[0.05em] ${
                     isActive ? "text-copperlite" : "text-taupe2 hover:text-sand"
                   }`}
                 >
@@ -155,9 +170,33 @@ export default function Floorplan() {
             {wingGroups.map((wg, gi) => (
               <div key={wg.label ?? `grp-${gi}`} className={gi > 0 ? "mt-[1.4rem]" : ""}>
                 {wg.label && (
-                  <p className="mb-[0.5rem] pl-[1.4rem] text-[0.95rem] font-semibold uppercase tracking-[0.22em] text-copperlite/80 mob:pl-3">
-                    {wg.label}
-                  </p>
+                  <div className="mb-[0.5rem] flex items-center justify-between gap-[0.6rem] pl-[1.4rem] pr-[0.2rem] mob:pl-3 mob:pr-0">
+                    <p className="min-w-0 truncate text-[0.95rem] font-semibold uppercase tracking-[0.22em] text-copperlite/80 mob:tracking-[0.16em]">
+                      {wg.label}
+                    </p>
+                    {/* Wing-level sheet (whole floor, all units) — opens in the
+                        same viewer as the unit plans. */}
+                    {wg.wingPlan && (
+                      <button
+                        type="button"
+                        data-interactive
+                        onClick={() => setFloorId(wg.wingPlan.id)}
+                        aria-label={`View the full ${wg.label} floor plan`}
+                        className={`shrink-0 whitespace-nowrap rounded-full border bg-transparent px-[0.8rem] py-[0.28rem] text-[0.8rem] font-medium tracking-[0.06em] transition-colors duration-300 mob:px-2.5 mob:py-1 mob:text-[0.68rem] ${
+                          activeFloor.id === wg.wingPlan.id
+                            ? "border-copperlite text-copperlite"
+                            : "border-copperlite/35 text-copperlite/70 hover:border-copperlite hover:text-copperlite"
+                        }`}
+                        style={
+                          activeFloor.id === wg.wingPlan.id
+                            ? { background: "rgba(214,161,105,0.12)" }
+                            : undefined
+                        }
+                      >
+                        View Floor Plan
+                      </button>
+                    )}
+                  </div>
                 )}
                 <div className="flex flex-col gap-1">
                   {wg.floors.map((f) => {
@@ -195,9 +234,11 @@ export default function Floorplan() {
             ))}
           </nav>
 
-          {/* Footer stat block */}
+          {/* Footer stat block — omitted for sheets with no unit areas */}
           <dl
-            className="mt-[1.6rem] flex flex-col gap-[1rem] pt-[1.6rem] mob:hidden"
+            className={`mt-[1.6rem] flex-col gap-[1rem] pt-[1.6rem] mob:hidden ${
+              stats.length ? "flex" : "hidden"
+            }`}
             style={{ borderTop: `1px solid ${HAIRLINE}` }}
           >
             {stats.map(([label, value]) => (
@@ -231,8 +272,12 @@ export default function Floorplan() {
         </div>
       </section>
 
-      {/* Mobile-only stat strip beneath the viewer */}
-      <dl className="hidden gap-2 px-4 pb-6 pt-3 text-center mob:flex" style={{ background: CONTENT_BG }}>
+      {/* Mobile-only stat strip beneath the viewer — omitted when there are no
+          areas to show (wing-level sheets, Eco Deck cut-sections). */}
+      <dl
+        className={`hidden gap-2 px-4 pb-6 pt-3 text-center ${stats.length ? "mob:flex" : ""}`}
+        style={{ background: CONTENT_BG }}
+      >
         {stats.map(([label, value]) => (
           <div
             key={label}
