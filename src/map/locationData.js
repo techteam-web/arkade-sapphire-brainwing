@@ -50,9 +50,17 @@ export const CATEGORIES = [
         id: "metro-2b",
         place: "Metroline 2B Station (Upcoming)",
         time: "4 mins",
-        lng: 72.83789686214136,
-        lat: 19.08218139942353,
+        lng: 72.83789552403212,
+        lat: 19.081840341057426,
         camera: { zoom: 15.2, pitch: 45, bearing: 0 },
+        // Hand-picked waypoints (Tilak Road -> Kanu Desai Road -> Swami
+        // Vivekanand Road) confirmed to trace the real drivable path. Each leg
+        // is routed live via OSRM and stitched together, since a single OSRM
+        // request across all of them snaps worse than routing leg-by-leg.
+        route: [
+          [72.84053097119138, 19.08223146269538],
+          [72.84086284231513, 19.080670660459266],
+        ],
       },
       {
         id: "domestic-airport",

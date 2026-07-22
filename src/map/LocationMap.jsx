@@ -149,9 +149,26 @@ export default function LocationMap({
       let geometry;
       let distanceMeters;
       try {
-        const r = await fetchDirections(SITE, poi);
-        geometry = r.geometry;
-        distanceMeters = r.distance;
+        if (poi.route) {
+          // Route real OSRM directions leg-by-leg through each waypoint, then
+          // stitch the road-snapped geometries together, so the line still
+          // follows actual streets rather than cutting straight between points.
+          const stops = [SITE, ...poi.route.map(([lng, lat]) => ({ lng, lat })), poi];
+          const legs = await Promise.all(
+            stops.slice(1).map((to, i) => fetchDirections(stops[i], to))
+          );
+          const coords = legs.reduce(
+            (acc, leg, i) =>
+              acc.concat(i === 0 ? leg.geometry.coordinates : leg.geometry.coordinates.slice(1)),
+            []
+          );
+          geometry = { type: "LineString", coordinates: coords };
+          distanceMeters = legs.reduce((sum, leg) => sum + leg.distance, 0);
+        } else {
+          const r = await fetchDirections(SITE, poi);
+          geometry = r.geometry;
+          distanceMeters = r.distance;
+        }
       } catch {
         geometry = {
           type: "LineString",
