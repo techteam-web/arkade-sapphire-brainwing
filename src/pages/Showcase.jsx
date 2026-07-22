@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "../gsap/gsapConfig.js";
+import { useAudio } from "../context/audio.js";
 
 // Same espresso radial gradient the Floorplan / Location sidebars use — a warm
 // glow from the top-left falling off into deep espresso.
@@ -10,13 +11,13 @@ const VIDEOS = [
     id: "JsBysmpC9ig",
     si: "x5BvPS_LCa8SAUym",
     title: "Sapphire showcase film 1",
-    label: "Brand Video",
+    label: "Walkthrough",
   },
   {
     id: "cPJO8aX1tKM",
     si: "Ab_JvjiGdqINqBZK",
     title: "Sapphire showcase film 2",
-    label: "Walkthrough",
+    label: "Brand Video",
   },
 ];
 
@@ -38,6 +39,16 @@ function embedSrc(video) {
 function VideoTile({ video }) {
   const [playing, setPlaying] = useState(false);
   const [thumb, setThumb] = useState(`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`);
+  const { beginVideo, endVideo } = useAudio();
+
+  // Duck the background score for as long as this video's iframe is mounted so
+  // the two soundtracks never play at once; it resumes on unmount (tile swapped
+  // out or the page left), not on the viewer pausing inside the YouTube player.
+  useEffect(() => {
+    if (!playing) return;
+    beginVideo();
+    return () => endVideo();
+  }, [playing, beginVideo, endVideo]);
 
   return (
     <div className="w-full max-w-180 bg-espresso/40 border border-platinum/10 p-4 mob:p-3">

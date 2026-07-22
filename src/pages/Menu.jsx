@@ -6,7 +6,7 @@ import AuraShowcase from "../components/AuraShowcase.jsx";
 const ROWS = [
   { num: "01", name: "Views",     path: "/views"     },
   { num: "02", name: "Gallery",   path: "/gallery"   },
-  { num: "03", name: "Floorplan", path: "/floorplan" },
+  { num: "03", name: "Floor plans", path: "/floorplan" },
   { num: "04", name: "Location",  path: "/location"  },
   { num: "05", name: "Brochure",  path: "/brochure"  },
   { num: "06", name: "Showcase",  path: "/showcase"  },

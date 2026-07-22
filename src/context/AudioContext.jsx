@@ -17,6 +17,7 @@ export function AudioProvider({ children }) {
   const [isMuted, setIsMuted] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const [inFullscreen, setInFullscreen] = useState(isFullscreen);
+  const [activeVideoCount, setActiveVideoCount] = useState(0);
 
   // Built on mount so it exists before any gesture can ask it to play.
   useEffect(() => {
@@ -36,8 +37,10 @@ export function AudioProvider({ children }) {
 
   // The score is allowed to sound only inside fullscreen. Leaving by Esc, F11 or
   // a gesture pauses it; coming back resumes from where it stopped, unless the
-  // user muted in the meantime.
-  const shouldPlay = hasStarted && !isMuted && (!FS_SUPPORTED || inFullscreen);
+  // user muted in the meantime. It's also ducked out entirely while a showcase
+  // video is playing, so the two soundtracks never overlap.
+  const shouldPlay =
+    hasStarted && !isMuted && activeVideoCount === 0 && (!FS_SUPPORTED || inFullscreen);
 
   // Single writer for playback. Everything else just moves the three flags
   // above, which keeps play/pause from being driven from several directions at
@@ -71,7 +74,16 @@ export function AudioProvider({ children }) {
     setIsMuted((m) => !m);
   }, []);
 
-  const value = useMemo(() => ({ isMuted, toggleMute, start }), [isMuted, toggleMute, start]);
+  // Ref-counted so multiple videos ducking at once can't resume the score early
+  // by unmounting out of order. Independent of isMuted — it doesn't touch the
+  // user's mute preference, just gates playback on top of it.
+  const beginVideo = useCallback(() => setActiveVideoCount((n) => n + 1), []);
+  const endVideo = useCallback(() => setActiveVideoCount((n) => Math.max(0, n - 1)), []);
+
+  const value = useMemo(
+    () => ({ isMuted, toggleMute, start, beginVideo, endVideo }),
+    [isMuted, toggleMute, start, beginVideo, endVideo]
+  );
 
   return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
 }
